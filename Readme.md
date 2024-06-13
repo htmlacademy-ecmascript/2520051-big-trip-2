@@ -1,7 +1,7 @@
 # Проект «Большое путешествие»
 
 * Студент: [Kateryna Timoschenko](https://up.htmlacademy.ru/ecmascript-individual/2/user/2520051).
-* Наставник: `Неизвестно`.
+* Наставник: `Евгений Лепёшкин`.
 
 ---
 
