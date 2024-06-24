@@ -169,6 +169,12 @@ function createNewPointFormTemplate() {
 }
 
 export default class NewPointFormView {
+
+  constructor (destinations, offers) {
+    this.destinations = destinations;
+    this.offers = offers;
+  }
+
   getTemplate() {
     return createNewPointFormTemplate();
   }
