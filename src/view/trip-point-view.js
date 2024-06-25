@@ -13,31 +13,31 @@ const createOfferItem = (offers, offersAll) => {
       +€&nbsp;
       <span class="event__offer-price">${offerInfo.price}</span>
     </li>`
-      )
-  })
+    );
+  });
   return (listItems.join(''));
-}
+};
 
 const createPointTemplate = (point, offersByType, destination) => {
-  const isFavoriteClassName = point.is_favorite?'event__favorite-btn--active':'';
+  const isFavoriteClassName = point.isFavorite ? 'event__favorite-btn--active' : '';
   return (
     `<li class="trip-events__item">
       <div class="event">
-        <time class="event__date" datetime="${getDatetimeFormat(point.date_from, DateFormat.DATE_DB)}">${getDatetimeFormat(point.date_from, DateFormat.HUMAN)}</time>
+        <time class="event__date" datetime="${getDatetimeFormat(point.dateFrom, DateFormat.DATE_DB)}">${getDatetimeFormat(point.dateFrom, DateFormat.HUMAN)}</time>
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${point.type}.png" alt="Event type icon">
         </div>
         <h3 class="event__title">${point.type} ${destination.name}</h3>
         <div class="event__schedule">
           <p class="event__time">
-            <time class="event__start-time" datetime="${getDatetimeFormat(point.date_from, DateFormat.DATE_TIME)}">${getDatetimeFormat(point.date_from, DateFormat.TIME)}</time>
+            <time class="event__start-time" datetime="${getDatetimeFormat(point.dateFrom, DateFormat.DATE_TIME)}">${getDatetimeFormat(point.dateFrom, DateFormat.TIME)}</time>
             —
-            <time class="event__end-time" datetime="${getDatetimeFormat(point.date_to, DateFormat.DATE_TIME)}">${getDatetimeFormat(point.date_to, DateFormat.TIME)}</time>
+            <time class="event__end-time" datetime="${getDatetimeFormat(point.dateTo, DateFormat.DATE_TIME)}">${getDatetimeFormat(point.dateTo, DateFormat.TIME)}</time>
           </p>
-          <p class="event__duration">${getDifferenceDate(point.date_to, point.date_from)}</p>
+          <p class="event__duration">${getDifferenceDate(point.dateTo, point.dateFrom)}</p>
         </div>
         <p class="event__price">
-          €&nbsp;<span class="event__price-value">${point.base_price}</span>
+          €&nbsp;<span class="event__price-value">${point.basePrice}</span>
         </p>
         <h4 class="visually-hidden">Offers:</h4>
         <ul class="event__selected-offers">
@@ -56,7 +56,7 @@ ${createOfferItem(point.offers, offersByType)}
     </li>
     `
   );
-}
+};
 
 export default class PointView {
 

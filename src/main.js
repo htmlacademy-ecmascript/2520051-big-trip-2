@@ -14,10 +14,10 @@ const models = {
   offers: new OffersModel(),
   destination: new DestinationsModel(),
   points: new PointsModel()
-}
+};
 
 const headerPresenter = new HeaderPresenter({
-  container: headerElement, 
+  container: headerElement,
   filterConteiner: filterControlElement
 });
 const tripTablePresenter = new TripTablePresenter(siteHeaderElement, hTittleElement, models);

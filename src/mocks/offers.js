@@ -17,7 +17,7 @@ export const offers = [
         title: 'Travel guide',
         price: 10,
       },
-      ]
+    ]
   },
   {
     type: 'bus',
@@ -42,7 +42,7 @@ export const offers = [
         title: 'Map',
         price: 5,
       },
-      ]
+    ]
   },
   {
     type: 'train',
@@ -62,7 +62,7 @@ export const offers = [
         title: 'Add meal',
         price: 15,
       },
-      ]
+    ]
   },
   {
     type: 'ship',
@@ -87,7 +87,7 @@ export const offers = [
         title: 'Add meal',
         price: 15,
       },
-      ]
+    ]
   },
   {
     type: 'drive',
@@ -107,7 +107,7 @@ export const offers = [
         title: 'Travel guide',
         price: 10,
       },
-      ]
+    ]
   },
   {
     type: 'flight',
@@ -127,7 +127,7 @@ export const offers = [
         title: 'Choose seats',
         price: 10,
       },
-      ]
+    ]
   },
   {
     type: 'check-in',
@@ -157,7 +157,7 @@ export const offers = [
         title: 'Car rental',
         price: 100,
       }
-      ]
+    ]
   },
   {
     type: 'sightseeing',
@@ -177,7 +177,7 @@ export const offers = [
         title: 'Map',
         price: 5,
       },
-      ]
+    ]
   },
   {
     type: 'restaurant',
@@ -187,10 +187,6 @@ export const offers = [
         title: 'Priority boarding',
         price: 20,
       },
-      ]
+    ]
   },
-]
-
-
-
-
+];
