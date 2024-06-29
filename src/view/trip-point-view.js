@@ -1,6 +1,6 @@
-import {createElement} from '../render.js';
 import { DateFormat } from '../constants.js';
 import { getDatetimeFormat, getDifferenceDate } from '../utils.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 
 const createOfferItem = (offers, offersAll) => {
@@ -58,27 +58,32 @@ ${createOfferItem(point.offers, offersByType)}
   );
 };
 
-export default class PointView {
+export default class PointView extends AbstractView {
 
   constructor(point, offersByType, destination) {
+    super();
     this.point = point;
     this.offers = offersByType.offers;
     this.destination = destination;
   }
 
-  getTemplate() {
+  get template() {
     return createPointTemplate(this.point, this.offers, this.destination);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
+  // getTemplate() {
+  //   return createPointTemplate(this.point, this.offers, this.destination);
+  // }
 
-    return this.element;
-  }
+  // getElement() {
+  //   if (!this.element) {
+  //     this.element = createElement(this.getTemplate());
+  //   }
 
-  removeElement() {
-    this.element = null;
-  }
+  //   return this.element;
+  // }
+
+  // removeElement() {
+  //   this.element = null;
+  // }
 }

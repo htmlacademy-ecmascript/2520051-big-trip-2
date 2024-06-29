@@ -1,4 +1,9 @@
-export const COUNT_POINTS = 3;
+export const RenderPosition = {
+  BEFOREBEGIN: 'beforebegin',
+  AFTERBEGIN: 'afterbegin',
+  BEFOREEND: 'beforeend',
+  AFTEREND: 'afterend',
+};
 
 export const DateFormat = {
   DATE_TIME: 'YYYY-MM-DDTHH:mm',

@@ -1,9 +1,10 @@
+import {render} from '../framework/render.js';
 import TripTableView from '../view/trip-table-view.js';
 import PointView from '../view/trip-point-view.js';
 import NewPointFormView from '../view/adding-form-view.js';
 import SortMenuView from '../view/sorting-view.js';
-import { render } from '../render.js';
-import { RenderPosition } from '../render.js';
+// import { render } from '../render.js';
+import { RenderPosition } from '../constants.js';
 
 
 export default class TripTablePresenter {
@@ -24,11 +25,11 @@ export default class TripTablePresenter {
 
     render(this.tableComponent, this.boardContainer);
     render(new SortMenuView(), this.hTittle, RenderPosition.AFTEREND);
-    render(new NewPointFormView(destinations, offersAll), this.tableComponent.getElement(), RenderPosition.AFTERBEGIN);
+    render(new NewPointFormView(destinations, offersAll), this.tableComponent.element, RenderPosition.AFTERBEGIN);
     points.forEach((point) => {
       const offersByType = offersAll.find((offer) => offer.type === point.type);
       const destination = destinations.find((dest) => dest.id === point.destination);
-      render(new PointView(point, offersByType,destination), this.tableComponent.getElement());
+      render(new PointView(point, offersByType,destination), this.tableComponent.element);
     });
     // render(new EditFormView(), this.tableComponent.getElement());
   }

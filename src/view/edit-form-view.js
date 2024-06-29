@@ -1,4 +1,4 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function createEditFormTemplate() {
   return (
@@ -161,20 +161,24 @@ function createEditFormTemplate() {
   );
 }
 
-export default class EditFormView {
-  getTemplate() {
+export default class EditFormView extends AbstractView {
+
+  get template() {
     return createEditFormTemplate();
   }
+  // getTemplate() {
+  //   return createEditFormTemplate();
+  // }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
+  // getElement() {
+  //   if (!this.element) {
+  //     this.element = createElement(this.getTemplate());
+  //   }
 
-    return this.element;
-  }
+  //   return this.element;
+  // }
 
-  removeElement() {
-    this.element = null;
-  }
+  // removeElement() {
+  //   this.element = null;
+  // }
 }
