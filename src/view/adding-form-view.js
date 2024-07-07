@@ -175,7 +175,7 @@ export default class NewPointFormView extends AbstractView {
     this.destinations = destinations;
     this.offers = offers;
   }
-  
+
   get template() {
     return createNewPointFormTemplate();
   }

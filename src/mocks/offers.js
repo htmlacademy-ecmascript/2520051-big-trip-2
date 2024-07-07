@@ -161,23 +161,7 @@ export const offers = [
   },
   {
     type: 'sightseeing',
-    offers: [
-      {
-        id: 'd7c2d4e8-7356-47b8-bc85-f25e4e02b68b',
-        title: 'Add meal',
-        price: 15,
-      },
-      {
-        id: 'f7d8c9e0-1112-1314-1516-920314253647',
-        title: 'Travel guide',
-        price: 10,
-      },
-      {
-        id: 'f8e9d0c1-1213-1415-1617-203142536758',
-        title: 'Map',
-        price: 5,
-      },
-    ]
+    offers: []
   },
   {
     type: 'restaurant',

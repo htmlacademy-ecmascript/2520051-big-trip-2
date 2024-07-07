@@ -33,19 +33,4 @@ export default class FilterFormView extends AbstractView {
   get template() {
     return createFilterFormTemplate();
   }
-  // getTemplate() {
-  //   return createFilterFormTemplate();
-  // }
-
-  // getElement() {
-  //   if (!this.element) {
-  //     this.element = createElement(this.getTemplate());
-  //   }
-
-  //   return this.element;
-  // }
-
-  // removeElement() {
-  //   this.element = null;
-  // }
 }
