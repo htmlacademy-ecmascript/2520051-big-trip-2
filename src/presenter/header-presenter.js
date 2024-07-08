@@ -1,7 +1,7 @@
 import InfoView from '../view/trip-info-view.js';
 import FilterFormView from '../view/filters-view.js';
-import {render} from '../render.js';
-import {RenderPosition} from '../render.js';
+import {render} from '../framework/render.js';
+import {RenderPosition} from '../constants.js';
 
 export default class HeaderPresenter {
 

@@ -1,12 +1,12 @@
-import {createElement} from '../render.js';
 import { DateFormat } from '../constants.js';
 import { getDatetimeFormat, getDifferenceDate } from '../utils.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 
-const createOfferItem = (offers, offersAll) => {
+const createOfferItem = (offers, offersByType) => {
   const listItems = [];
   offers.forEach((offer) => {
-    const offerInfo = offersAll.find((offerItem) => offerItem.id === offer);
+    const offerInfo = offersByType.offers.find((offerItem) => offerItem.id === offer);
     listItems.push(
       `<li class="event__offer">
       <span class="event__offer-title">${offerInfo.title}</span>
@@ -58,27 +58,32 @@ ${createOfferItem(point.offers, offersByType)}
   );
 };
 
-export default class PointView {
+export default class PointView extends AbstractView {
+  #point = null;
+  #offers = null;
+  #destination = null;
+  #hendleEditClick = null;
+  #offersByType = null;
 
-  constructor(point, offersByType, destination) {
-    this.point = point;
-    this.offers = offersByType.offers;
-    this.destination = destination;
+  constructor(point, offersAll, destination, onEditClick) {
+    super();
+    this.#point = point;
+    this.#offers = offersAll;
+    this.#destination = destination;
+    this.#hendleEditClick = onEditClick;
+
+    this.#offersByType = this.#offers.find((offer) => offer.type === this.#point.type);
+
+    this.element.querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#clickEditHendler);
   }
 
-  getTemplate() {
-    return createPointTemplate(this.point, this.offers, this.destination);
+  get template() {
+    return createPointTemplate(this.#point, this.#offersByType, this.#destination);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #clickEditHendler = (evt) => {
+    evt.preventDefault();
+    this.#hendleEditClick();
+  };
 }
