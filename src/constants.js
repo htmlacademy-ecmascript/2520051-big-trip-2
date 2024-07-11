@@ -12,3 +12,8 @@ export const DateFormat = {
   DATE_DB: 'YYYY-MM-DD',
   BRITAIN: 'DD/MM/YY HH:mm'
 };
+
+export const DataStatus = {
+  EMPTY: 'Click New Event to create your first point',
+  ERROR: 'Data loading error'
+};
