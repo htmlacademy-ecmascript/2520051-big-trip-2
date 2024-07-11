@@ -75,9 +75,8 @@ const createPhotoContainer = (photos) => {
                     </div>`;
 };
 
-const createEditFormTemplate = (point, types, destination, destinations, offersByType) => {
-  return (
-    `<li class="trip-events__item">
+const createEditFormTemplate = (point, types, destination, destinations, offersByType) =>
+  `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
         <div class="event__type-wrapper">
@@ -138,9 +137,8 @@ ${createOffersSection(point.offers, offersByType)}
       </section>
     </form>
   </li>
-`
-  );
-};
+`;
+
 
 export default class EditFormView extends AbstractView {
   #point = null;
