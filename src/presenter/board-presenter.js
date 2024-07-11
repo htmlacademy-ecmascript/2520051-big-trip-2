@@ -4,33 +4,47 @@ import PointView from '../view/trip-point-view.js';
 // import NewPointFormView from '../view/adding-form-view.js';
 import EditFormView from '../view/edit-form-view.js';
 import SortMenuView from '../view/sorting-view.js';
-import { RenderPosition } from '../constants.js';
+import { RenderPosition, DataStatus } from '../constants.js';
+
+import InfoView from '../view/trip-info-view.js';
+import FilterFormView from '../view/filters-view.js';
+import EmptyTableView from '../view/empty-table-view.js';
 
 
 export default class TripTablePresenter {
   #tableComponent = new TripTableView();
 
-  #boardContainer = null;
-  #hTittle = null;
   #offersModel = null;
   #destinationModel = null;
   #pointsModel = null;
   #types = null;
 
 
-  constructor(boardContainer, hTittle, models) {
-    this.#boardContainer = boardContainer;
-    this.#hTittle = hTittle;
+  constructor(models) {
     this.#offersModel = models.offers;
     this.#destinationModel = models.destination;
     this.#pointsModel = models.points;
     this.#types = this.#offersModel.types;
   }
 
-
   init() {
-    render(this.#tableComponent, this.#boardContainer);
-    render(new SortMenuView(), this.#hTittle, RenderPosition.AFTEREND);
+    const boardContainer = document.querySelector('.trip-events');
+    const hTittle = boardContainer.querySelector('h2');
+    const headerElement = document.querySelector('.trip-main');
+    const filterControlElement = headerElement.querySelector('.trip-controls__filters');
+
+    render(new FilterFormView(), filterControlElement);
+    if (this.#pointsModel.points === undefined) {
+      render(new EmptyTableView(DataStatus.ERROR), boardContainer);
+      return;
+    }
+    if (!this.#pointsModel.points.length) {
+      render(new EmptyTableView(DataStatus.EMPTY), boardContainer);
+      return;
+    }
+    render(new InfoView(), headerElement, RenderPosition.AFTERBEGIN);
+    render(this.#tableComponent, boardContainer);
+    render(new SortMenuView(), hTittle, RenderPosition.AFTEREND);
     // render(new NewPointFormView(destinations, offersAll), this.#tableComponent.element, RenderPosition.AFTERBEGIN);
     this.#pointsModel.points.forEach((point) => {
       this.#renderPoint(
