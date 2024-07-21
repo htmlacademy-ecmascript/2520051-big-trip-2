@@ -1,51 +1,68 @@
-import {render, replace} from '../framework/render.js';
+import {render} from '../framework/render.js';
 import TripTableView from '../view/trip-table-view.js';
-import PointView from '../view/trip-point-view.js';
-// import NewPointFormView from '../view/adding-form-view.js';
-import EditFormView from '../view/edit-form-view.js';
-import SortMenuView from '../view/sorting-view.js';
-import { RenderPosition, DataStatus } from '../constants.js';
+import { DataStatus } from '../constants.js';
 
-import InfoView from '../view/trip-info-view.js';
 import FilterFormView from '../view/filters-view.js';
 import EmptyTableView from '../view/empty-table-view.js';
+import InfoPresenter from './info-presenter.js';
+import SortPresenter from './sort-presenter.js';
+import PointPresenter from './point-presenter.js';
+import { updateItem } from '../utils.js';
 
 
 export default class TripTablePresenter {
   #tableComponent = new TripTableView();
+  #boardContainer = null;
+  #headerElement = null;
 
   #offersModel = null;
   #destinationModel = null;
   #pointsModel = null;
-  #types = null;
 
+  #pointPresenters = new Map();
+  #boardTrip = [];
 
   constructor(models) {
     this.#offersModel = models.offers;
     this.#destinationModel = models.destination;
     this.#pointsModel = models.points;
-    this.#types = this.#offersModel.types;
   }
 
   init() {
-    const boardContainer = document.querySelector('.trip-events');
-    const hTittle = boardContainer.querySelector('h2');
-    const headerElement = document.querySelector('.trip-main');
-    const filterControlElement = headerElement.querySelector('.trip-controls__filters');
+    this.#boardContainer = document.querySelector('.trip-events');
+    this.#headerElement = document.querySelector('.trip-main');
+    const filterControlElement = this.#headerElement.querySelector('.trip-controls__filters');
 
     render(new FilterFormView(), filterControlElement);
     if (this.#pointsModel.points === undefined) {
-      render(new EmptyTableView(DataStatus.ERROR), boardContainer);
+      render(new EmptyTableView(DataStatus.ERROR), this.#boardContainer);
       return;
     }
     if (!this.#pointsModel.points.length) {
-      render(new EmptyTableView(DataStatus.EMPTY), boardContainer);
+      render(new EmptyTableView(DataStatus.EMPTY), this.#boardContainer);
       return;
     }
-    render(new InfoView(), headerElement, RenderPosition.AFTERBEGIN);
-    render(this.#tableComponent, boardContainer);
-    render(new SortMenuView(), hTittle, RenderPosition.AFTEREND);
-    // render(new NewPointFormView(destinations, offersAll), this.#tableComponent.element, RenderPosition.AFTERBEGIN);
+
+    this.#boardTrip = [...this.#pointsModel.points];
+    this.#renderBoard();
+
+  }
+
+  #renderBoard() {
+
+    const hTittle = this.#boardContainer.querySelector('h2');
+
+    const sortPresenter = new SortPresenter();
+    const infoPresenter = new InfoPresenter();
+
+    infoPresenter.init(this.#headerElement);
+    sortPresenter.init(hTittle);
+
+    this.#renderPoints();
+  }
+
+  #renderPoints () {
+    render(this.#tableComponent, this.#boardContainer);
     this.#pointsModel.points.forEach((point) => {
       this.#renderPoint(
         point
@@ -53,51 +70,31 @@ export default class TripTablePresenter {
     });
   }
 
+
+  #handleModeChange = () => {
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+  };
+
   #renderPoint(point) {
-    const offersAll = this.#offersModel.offers;
-    const destination = this.#destinationModel.getDestinationById(point.destination);
-    const offersByType = this.#offersModel.getOffersByType(point.type);
 
-    const escKeyDownHandler = (evt) => {
-      if (evt.key === 'Escape') {
-        evt.preventDefault();
-        replaceEditToPoint();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
-    };
-
-    const pointComponent = new PointView(
-      point,
-      offersAll,
-      destination,
-      () => {
-        replacePointToEdit();
-        document.addEventListener('keydown', escKeyDownHandler);
-      }
+    const pointPresenter = new PointPresenter(
+      this.#offersModel,
+      this.#destinationModel,
+      this.#tableComponent.element,
+      this.#handleTaskChange,
+      this.#handleModeChange
     );
-    const editComponent = new EditFormView(
-      point,
-      this.#types,
-      offersByType.offers,
-      this.#destinationModel.destinations,
-      () => {
-        replaceEditToPoint();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      },
-      () => {
-        replaceEditToPoint();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
-    );
+    pointPresenter.init(point);
+    this.#pointPresenters.set(point.id, pointPresenter);
+  }
 
-    function replaceEditToPoint () {
-      replace(pointComponent, editComponent);
-    }
+  #handleTaskChange = (updatedTask) => {
+    this.#boardTrip = updateItem(this.#boardTrip, updatedTask);
+    this.#pointPresenters.get(updatedTask.id).init(updatedTask);
+  };
 
-    function replacePointToEdit () {
-      replace(editComponent, pointComponent);
-    }
-
-    render(pointComponent, this.#tableComponent.element);
+  #clearBoard() {
+    this.#pointPresenters.forEach((presenter) => presenter.destroy());
+    this.#pointPresenters.clear();
   }
 }
