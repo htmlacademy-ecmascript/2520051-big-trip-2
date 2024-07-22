@@ -26,6 +26,7 @@
     "node": "20"
   },
   "dependencies": {
-    "dayjs": "1.11.11"
+    "dayjs": "1.11.11",
+    "nanoid": "4.0.2"
   }
 }

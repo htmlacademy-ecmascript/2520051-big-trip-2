@@ -21,3 +21,6 @@ export const getDifferenceDate = (finishTerm, startTerm) => {
   }
   return `${minutes}M`;
 };
+
+export const updateItem = (items, update) => items.map((item) => item.id === update.id ? update : item);
+
