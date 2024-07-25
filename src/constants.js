@@ -17,3 +17,9 @@ export const DataStatus = {
   EMPTY: 'Click New Event to create your first point',
   ERROR: 'Data loading error'
 };
+
+export const SortType = {
+  DEFAULT: 'day',
+  TIME: 'time',
+  PRICE: 'price',
+};

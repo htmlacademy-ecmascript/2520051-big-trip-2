@@ -2,12 +2,17 @@ import {render} from '../framework/render.js';
 import TripTableView from '../view/trip-table-view.js';
 import { DataStatus } from '../constants.js';
 
+import SortMenuView from '../view/sorting-view.js';
 import FilterFormView from '../view/filters-view.js';
 import EmptyTableView from '../view/empty-table-view.js';
+
+import { RenderPosition } from '../constants.js';
+
 import InfoPresenter from './info-presenter.js';
-import SortPresenter from './sort-presenter.js';
 import PointPresenter from './point-presenter.js';
-import { updateItem } from '../utils.js';
+import { updateItem, sortByTime } from '../utils.js';
+
+import { SortType } from '../constants.js';
 
 
 export default class TripTablePresenter {
@@ -21,6 +26,8 @@ export default class TripTablePresenter {
 
   #pointPresenters = new Map();
   #boardTrip = [];
+  #sourcedBoardTasks = [];
+  #currentSortType = SortType.DEFAULT;
 
   constructor(models) {
     this.#offersModel = models.offers;
@@ -46,24 +53,64 @@ export default class TripTablePresenter {
     this.#boardTrip = [...this.#pointsModel.points];
     this.#renderBoard();
 
+    this.#sourcedBoardTasks = [...this.#pointsModel.points];
+
+  }
+
+  #handleSortTypeChange = (sortType) => {
+    if (this.#currentSortType === sortType) {
+      return;
+    }
+
+    this.#sortTasks(sortType);
+    this.#clearBoard();
+    this.#renderPoints();
+  };
+
+  #sortByPrice = () => {
+    this.#boardTrip.sort((a, b) => b.basePrice - a.basePrice);
+  };
+
+  #sortByTime = () => {
+    this.#boardTrip.sort((a, b) => sortByTime(a, b));
+  };
+
+  #sortTasks(sortType) {
+    // 2. Этот исходный массив задач необходим,
+    // потому что для сортировки мы будем мутировать
+    // массив в свойстве _boardTasks
+
+    switch (sortType) {
+      case SortType.TIME:
+        this.#sortByTime();
+        break;
+      case SortType.PRICE:
+        this.#sortByPrice();
+        break;
+      default:
+        // 3. А когда пользователь захочет "вернуть всё, как было",
+        // мы просто запишем в _boardTasks исходный массив
+        this.#boardTrip = [...this.#sourcedBoardTasks];
+    }
+    this.#currentSortType = sortType;
   }
 
   #renderBoard() {
 
     const hTittle = this.#boardContainer.querySelector('h2');
 
-    const sortPresenter = new SortPresenter();
     const infoPresenter = new InfoPresenter();
-
     infoPresenter.init(this.#headerElement);
-    sortPresenter.init(hTittle);
+
+    render(new SortMenuView(this.#handleSortTypeChange), hTittle, RenderPosition.AFTEREND);
+
 
     this.#renderPoints();
   }
 
   #renderPoints () {
     render(this.#tableComponent, this.#boardContainer);
-    this.#pointsModel.points.forEach((point) => {
+    this.#boardTrip.forEach((point) => {
       this.#renderPoint(
         point
       );
@@ -90,6 +137,7 @@ export default class TripTablePresenter {
 
   #handleTaskChange = (updatedTask) => {
     this.#boardTrip = updateItem(this.#boardTrip, updatedTask);
+    this.#sourcedBoardTasks = updateItem(this.#sourcedBoardTasks, updatedTask);
     this.#pointPresenters.get(updatedTask.id).init(updatedTask);
   };
 
@@ -97,4 +145,5 @@ export default class TripTablePresenter {
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
   }
+
 }
