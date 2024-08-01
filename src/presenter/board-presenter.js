@@ -37,6 +37,7 @@ export default class TripTablePresenter {
 
   init() {
     this.#boardContainer = document.querySelector('.trip-events');
+    // console.log(this.#boardContainer);
     this.#headerElement = document.querySelector('.trip-main');
     const filterControlElement = this.#headerElement.querySelector('.trip-controls__filters');
 
@@ -128,14 +129,14 @@ export default class TripTablePresenter {
       this.#offersModel,
       this.#destinationModel,
       this.#tableComponent.element,
-      this.#handleTaskChange,
+      this.#handleDataChange,
       this.#handleModeChange
     );
     pointPresenter.init(point);
     this.#pointPresenters.set(point.id, pointPresenter);
   }
 
-  #handleTaskChange = (updatedTask) => {
+  #handleDataChange = (updatedTask) => {
     this.#boardTrip = updateItem(this.#boardTrip, updatedTask);
     this.#sourcedBoardTasks = updateItem(this.#sourcedBoardTasks, updatedTask);
     this.#pointPresenters.get(updatedTask.id).init(updatedTask);

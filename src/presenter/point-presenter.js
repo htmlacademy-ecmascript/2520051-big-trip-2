@@ -22,7 +22,7 @@ export default class PointPresenter {
   #point = null;
   #mode = Mode.DEFAULT;
 
-  #handleFavoriteChange = null;
+  #handleDataChange = null;
   #handleModeChange = null;
 
   constructor (offersModel, destinationModel, tableElement, onDataChange, onModeChange) {
@@ -32,8 +32,9 @@ export default class PointPresenter {
     this.#types = this.#offersModel.types;
     this.#destinations = this.#destinationModel.destinations;
 
-    this.#handleFavoriteChange = onDataChange;
+    this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
+
   }
 
   init(point) {
@@ -41,7 +42,6 @@ export default class PointPresenter {
 
     const offersAll = this.#offersModel.offers;
     const destination = this.#destinationModel.getDestinationById(point.destination);
-    const offersByType = this.#offersModel.getOffersByType(point.type);
 
     const prevPointComponent = this.#pointComponent;
     const prevEditComponent = this.#editComponent;
@@ -50,6 +50,7 @@ export default class PointPresenter {
       if (evt.key === 'Escape') {
         evt.preventDefault();
         this.#replaceEditToPoint();
+        this.#editComponent.reset(this.#point);
         document.removeEventListener('keydown', escKeyDownHandler);
       }
     };
@@ -68,20 +69,19 @@ export default class PointPresenter {
     this.#editComponent = new EditFormView(
       this.#point,
       this.#types,
-      offersByType.offers,
+      this.#offersModel,
       this.#destinations,
-      () => {
-        this.#replaceEditToPoint();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      },
-      () => {
-        this.#replaceEditToPoint();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
+      this.#handleDemoClick,
+      this.#handleFormSubmit
     );
 
+    
     if (prevPointComponent === null || prevEditComponent === null) {
       render(this.#pointComponent, this.#tableElement);
+      console.log('PointPresenter.init');
+      console.log(this.#editComponent);
+      console.log(this.#editComponent.element);
+      console.log(this.#editComponent.element.parentElement);
       return;
     }
 
@@ -102,8 +102,21 @@ export default class PointPresenter {
     }
   }
 
+  #handleFormSubmit = () => {
+    this.#replaceEditToPoint();
+    document.removeEventListener('keydown', escKeyDownHandler);
+  }
+
+  #handleDemoClick = () => {
+    this.#replaceEditToPoint();
+    console.log('handleDemoClick', this.#editComponent);
+    console.log('parentElement', this.#editComponent.element.parentElement);
+    this.#editComponent.reset(this.#point);
+    document.removeEventListener('keydown', escKeyDownHandler);
+  }
+
   #handleFavoriteClick = () => {
-    this.#handleFavoriteChange({...this.#point, isFavorite: !this.#point.isFavorite});
+    this.#handleDataChange({...this.#point, isFavorite: !this.#point.isFavorite});
   };
 
   #replaceEditToPoint () {
