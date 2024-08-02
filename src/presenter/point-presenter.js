@@ -46,22 +46,13 @@ export default class PointPresenter {
     const prevPointComponent = this.#pointComponent;
     const prevEditComponent = this.#editComponent;
 
-    const escKeyDownHandler = (evt) => {
-      if (evt.key === 'Escape') {
-        evt.preventDefault();
-        this.#replaceEditToPoint();
-        this.#editComponent.reset(this.#point);
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
-    };
-
     this.#pointComponent = new PointView(
       this.#point,
       offersAll,
       destination,
       () => {
         this.#replacePointToEdit();
-        document.addEventListener('keydown', escKeyDownHandler);
+        document.addEventListener('keydown', this.#escKeyDownHandler);
       },
       this.#handleFavoriteClick
     );
@@ -75,13 +66,8 @@ export default class PointPresenter {
       this.#handleFormSubmit
     );
 
-    
     if (prevPointComponent === null || prevEditComponent === null) {
       render(this.#pointComponent, this.#tableElement);
-      console.log('PointPresenter.init');
-      console.log(this.#editComponent);
-      console.log(this.#editComponent.element);
-      console.log(this.#editComponent.element.parentElement);
       return;
     }
 
@@ -98,22 +84,20 @@ export default class PointPresenter {
 
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
+      this.#editComponent.reset(this.#point);
       this.#replaceEditToPoint();
     }
   }
 
-  #handleFormSubmit = () => {
+  #handleFormSubmit = (point) => {
+    this.#handleDataChange(point);
     this.#replaceEditToPoint();
-    document.removeEventListener('keydown', escKeyDownHandler);
-  }
+  };
 
   #handleDemoClick = () => {
-    this.#replaceEditToPoint();
-    console.log('handleDemoClick', this.#editComponent);
-    console.log('parentElement', this.#editComponent.element.parentElement);
     this.#editComponent.reset(this.#point);
-    document.removeEventListener('keydown', escKeyDownHandler);
-  }
+    this.#replaceEditToPoint();
+  };
 
   #handleFavoriteClick = () => {
     this.#handleDataChange({...this.#point, isFavorite: !this.#point.isFavorite});
@@ -121,6 +105,7 @@ export default class PointPresenter {
 
   #replaceEditToPoint () {
     replace(this.#pointComponent, this.#editComponent);
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
     this.#mode = Mode.DEFAULT;
   }
 
@@ -129,6 +114,14 @@ export default class PointPresenter {
     this.#handleModeChange();
     this.#mode = Mode.EDITING;
   }
+
+  #escKeyDownHandler = (evt) => {
+    if (evt.key === 'Escape') {
+      evt.preventDefault();
+      this.#editComponent.reset(this.#point);
+      this.#replaceEditToPoint();
+    }
+  };
 
   destroy () {
     remove(this.#pointComponent);

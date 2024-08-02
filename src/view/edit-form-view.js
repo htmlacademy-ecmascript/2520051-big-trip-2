@@ -158,11 +158,11 @@ export default class EditFormView extends AbstractStatefulView {
     this.#hendleDemoClick = onDemoClick;
     this.#types = types;
     this.#handleFormSubmit = onFormSubmit;
-    
+
     this._setState(this.#point); //потом засунуть в функцию, если будет нужно parsePointToState
     this._restoreHandlers();
   }
-  
+
   get template() {
     const pointDestination = this.#destinations.find((dest) => dest.id === this._state.destination);
     this.#offersByType = this.#offersModel.getOffersByType(this._state.type).offers;
@@ -189,30 +189,28 @@ export default class EditFormView extends AbstractStatefulView {
     this.element.querySelector('#event-destination-1').addEventListener('focus', (evt) => {
       this.#prevDestination = evt.target.value;
       evt.target.value = '';
-    })
+    });
 
     this.element.querySelector('#event-destination-1').addEventListener('blur', (evt) => {
       if (this.#destinations.find((elem) => evt.target.value === elem.name)){
         return;
       }
       evt.target.value = this.#prevDestination;
-      })
+    });
 
-
-    this.element.querySelector('#event-destination-1').addEventListener('input', this.#destinationChangeHandler)
+    this.element.querySelector('#event-destination-1').addEventListener('input', this.#destinationChangeHandler);
   };
 
-  
   #clickDemoHendler = (evt) => {
     evt.preventDefault();
     this.#hendleDemoClick();
   };
-  
+
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit();
+    this.#handleFormSubmit(this._state);
   };
-  
+
   #typeChangeHandler = (evt) => {
     if (evt.target.tagName !== 'INPUT') {
       return;
@@ -225,7 +223,7 @@ export default class EditFormView extends AbstractStatefulView {
     const selectedDestination = this.#destinations.find((elem) => evt.target.value === elem.name);
     if (selectedDestination){
       this.updateElement({...this._state, destination: selectedDestination.id});
-    } 
+    }
   };
 
   reset = (point) => this.updateElement(point);
