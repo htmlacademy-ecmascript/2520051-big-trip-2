@@ -1,7 +1,6 @@
 import AbstractView from '../framework/view/abstract-view.js';
-// import {DataSort as SortMode} from '../constants.js';
 
-const SortMode = [
+const sortModes = [
   {
     TYPE: 'day',
     HTML: 'Day',
@@ -36,7 +35,7 @@ const SortMode = [
 
 function createSortItems() {
   const sortMenuList = [];
-  SortMode.forEach((sortItem) => {
+  sortModes.forEach((sortItem) => {
     sortMenuList.push(
       `<div class="trip-sort__item  trip-sort__item--${sortItem.TYPE}">
       <input id="sort-${sortItem.TYPE}" class="trip-sort__input  visually-hidden" type="radio" 

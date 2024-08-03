@@ -1,4 +1,4 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { DateFormat } from '../constants.js';
 import { getDatetimeFormat } from '../utils.js';
 
@@ -34,7 +34,7 @@ const createTypeList = (types) => {
 };
 
 const createOffersSection = (offers, offersByType) => {
-  if (!offers.length) {
+  if (!offersByType.length) {
     return '';
   }
   return (
@@ -140,41 +140,66 @@ ${createOffersSection(point.offers, offersByType)}
 `;
 
 
-export default class EditFormView extends AbstractView {
+export default class EditFormView extends AbstractStatefulView {
   #point = null;
+  #offersModel = null;
   #offersByType = null;
   #destinations = null;
   #hendleDemoClick;
   #handleFormSubmit;
   #types;
+  #prevDestination = null;
 
-  constructor (point, types, offersByType, destinations, onDemoClick, onFormSubmit) {
+  constructor (point, types, offersModel, destinations, onDemoClick, onFormSubmit) {
     super();
     this.#point = point;
-    this.#offersByType = offersByType;
+    this.#offersModel = offersModel;
     this.#destinations = destinations;
     this.#hendleDemoClick = onDemoClick;
     this.#types = types;
     this.#handleFormSubmit = onFormSubmit;
 
+    this._setState(this.#point); //потом засунуть в функцию, если будет нужно parsePointToState
+    this._restoreHandlers();
+  }
+
+  get template() {
+    const pointDestination = this.#destinations.find((dest) => dest.id === this._state.destination);
+    this.#offersByType = this.#offersModel.getOffersByType(this._state.type).offers;
+    return createEditFormTemplate(
+      this._state,
+      this.#types,
+      pointDestination,
+      this.#destinations,
+      this.#offersByType,
+    );
+  }
+
+  _restoreHandlers = () => {
     this.element.querySelector('.event__rollup-btn')
       .addEventListener('click', this.#clickDemoHendler);
 
 
     this.element.querySelector('form')
       .addEventListener('submit', this.#formSubmitHandler);
-  }
 
-  get template() {
-    const pointDestination = this.#destinations.find((dest) => dest.id === this.#point.destination);
-    return createEditFormTemplate(
-      this.#point,
-      this.#types,
-      pointDestination,
-      this.#destinations,
-      this.#offersByType
-    );
-  }
+    this.element.querySelector('.event__type-list')
+      .addEventListener('click', this.#typeChangeHandler);
+
+    this.element.querySelector('#event-destination-1').addEventListener('focus', (evt) => {
+      this.#prevDestination = evt.target.value;
+      evt.target.value = '';
+    });
+
+    this.element.querySelector('#event-destination-1').addEventListener('blur', (evt) => {
+      if (this.#destinations.find((elem) => evt.target.value === elem.name)){
+        return;
+      }
+      evt.target.value = this.#prevDestination;
+    });
+
+    this.element.querySelector('#event-destination-1').addEventListener('input', this.#destinationChangeHandler);
+  };
 
   #clickDemoHendler = (evt) => {
     evt.preventDefault();
@@ -183,7 +208,24 @@ export default class EditFormView extends AbstractView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit();
+    this.#handleFormSubmit(this._state);
   };
+
+  #typeChangeHandler = (evt) => {
+    if (evt.target.tagName !== 'INPUT') {
+      return;
+    }
+    this.updateElement({...this._state, type: evt.target.value, offers: []}); // добавить проверку, изменился ли тип
+
+  };
+
+  #destinationChangeHandler = (evt) => {
+    const selectedDestination = this.#destinations.find((elem) => evt.target.value === elem.name);
+    if (selectedDestination){
+      this.updateElement({...this._state, destination: selectedDestination.id});
+    }
+  };
+
+  reset = (point) => this.updateElement(point);
 
 }
