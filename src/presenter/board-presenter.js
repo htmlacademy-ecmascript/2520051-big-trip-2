@@ -37,7 +37,6 @@ export default class TripTablePresenter {
 
   init() {
     this.#boardContainer = document.querySelector('.trip-events');
-    // console.log(this.#boardContainer);
     this.#headerElement = document.querySelector('.trip-main');
     const filterControlElement = this.#headerElement.querySelector('.trip-controls__filters');
 
@@ -77,10 +76,6 @@ export default class TripTablePresenter {
   };
 
   #sortTasks(sortType) {
-    // 2. Этот исходный массив задач необходим,
-    // потому что для сортировки мы будем мутировать
-    // массив в свойстве _boardTasks
-
     switch (sortType) {
       case SortType.TIME:
         this.#sortByTime();
@@ -89,8 +84,6 @@ export default class TripTablePresenter {
         this.#sortByPrice();
         break;
       default:
-        // 3. А когда пользователь захочет "вернуть всё, как было",
-        // мы просто запишем в _boardTasks исходный массив
         this.#boardTrip = [...this.#sourcedBoardTasks];
     }
     this.#currentSortType = sortType;
@@ -98,12 +91,12 @@ export default class TripTablePresenter {
 
   #renderBoard() {
 
-    const hTittle = this.#boardContainer.querySelector('h2');
+    const tittleElement = this.#boardContainer.querySelector('h2');
 
     const infoPresenter = new InfoPresenter();
     infoPresenter.init(this.#headerElement);
 
-    render(new SortMenuView(this.#handleSortTypeChange), hTittle, RenderPosition.AFTEREND);
+    render(new SortMenuView(this.#handleSortTypeChange), tittleElement, RenderPosition.AFTEREND);
 
 
     this.#renderPoints();
