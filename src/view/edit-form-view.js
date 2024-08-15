@@ -153,8 +153,10 @@ export default class EditFormView extends AbstractStatefulView {
   #prevDestination = null;
   #dateFromPickr = null;
   #dateToPickr = null;
+  #handleDeleteClick = null;
 
-  constructor (point, types, offersModel, destinations, onDemoClick, onFormSubmit) {
+
+  constructor (point, types, offersModel, destinations, onDemoClick, onFormSubmit, onDeleteClick) {
     super();
     this.#point = point;
     this.#offersModel = offersModel;
@@ -162,6 +164,7 @@ export default class EditFormView extends AbstractStatefulView {
     this.#hendleDemoClick = onDemoClick;
     this.#types = types;
     this.#handleFormSubmit = onFormSubmit;
+    this.#handleDeleteClick = onDeleteClick;
 
     this._setState(this.#point); //потом засунуть в функцию, если будет нужно parsePointToState
     this._restoreHandlers();
@@ -189,6 +192,10 @@ export default class EditFormView extends AbstractStatefulView {
 
     this.element.querySelector('.event__type-list')
       .addEventListener('click', this.#typeChangeHandler);
+
+    this.element.querySelector('.event__reset-btn')
+    .addEventListener('click', this.#formDeleteClickHandler);
+
 
     this.element.querySelector('#event-destination-1').addEventListener('focus', (evt) => {
       this.#prevDestination = evt.target.value;
@@ -243,6 +250,11 @@ export default class EditFormView extends AbstractStatefulView {
       ...this._state,
       dateTo: userDate,
     });
+  };
+
+  #formDeleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleDeleteClick(this._state);
   };
 
   removeElement() {

@@ -1,9 +1,10 @@
 import { offers } from './offers.js';
 import { destinations } from './destinations.js';
+import { sortByTime } from '../utils.js';
 
 const getRandomDate = () => {
-  const start = new Date(2018, 0, 1);
-  const end = new Date(2024, 11, 31);
+  const start = new Date(2024, 4, 1);
+  const end = new Date(2025, 4, 31);
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 };
 
@@ -37,7 +38,8 @@ const generatePoints = () => {
 
     points.push(point);
   }
-  return points;
+
+  return points.sort((a, b) => sortByTime(a, b));
 };
 
 export const pointsData = generatePoints();
