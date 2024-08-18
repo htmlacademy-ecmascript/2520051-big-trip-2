@@ -34,13 +34,25 @@ ${createFilterItems(currentFilter)}
 
 export default class FilterFormView extends AbstractView {
   #currentFilter = null;
+  #handleFilterChange = null;
 
-  constructor(currentFilter){
+  constructor(currentFilter, onFilterGange){
     super();
     this.#currentFilter = currentFilter;
+    this.#handleFilterChange = onFilterGange;
+    this._restoreHandlers();
   }
 
   get template() {
     return createFilterFormTemplate(this.#currentFilter);
   }
+
+  _restoreHandlers = () => {
+    const filterElements = this.element.querySelectorAll('.trip-filters__filter-input');
+    filterElements.forEach((element) => {
+      element.addEventListener('click', (evt) => {
+        this.#handleFilterChange(evt.target.value);
+      });
+    });
+  };
 }

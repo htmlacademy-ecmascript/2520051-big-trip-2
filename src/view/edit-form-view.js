@@ -166,7 +166,7 @@ export default class EditFormView extends AbstractStatefulView {
     this.#handleFormSubmit = onFormSubmit;
     this.#handleDeleteClick = onDeleteClick;
 
-    this._setState(this.#point); //потом засунуть в функцию, если будет нужно parsePointToState
+    this._setState(this.#point);
     this._restoreHandlers();
   }
 
@@ -194,7 +194,7 @@ export default class EditFormView extends AbstractStatefulView {
       .addEventListener('click', this.#typeChangeHandler);
 
     this.element.querySelector('.event__reset-btn')
-    .addEventListener('click', this.#formDeleteClickHandler);
+      .addEventListener('click', this.#formDeleteClickHandler);
 
 
     this.element.querySelector('#event-destination-1').addEventListener('focus', (evt) => {

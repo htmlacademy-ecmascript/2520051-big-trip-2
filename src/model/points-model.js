@@ -8,6 +8,10 @@ export default class PointsModel extends Observable {
   #points = pointsData;
   #dataFilter = null;
 
+  get dataFilter() {
+    return this.#dataFilter;
+  }
+
   set dataFilter(filter) {
     this.#dataFilter = filter;
   }
@@ -15,14 +19,14 @@ export default class PointsModel extends Observable {
   get points() {
     switch (this.#dataFilter){
       case Filter.FUTURE:
-        return this.#points.filter((point) => dayjs().isBefore(point.dateFrom, 'day'))
+        return this.#points.filter((point) => dayjs().isBefore(point.dateFrom, 'day'));
       case Filter.PRESENT:
-        return this.#points.filter((point) => dayjs().isSame(point.dateFrom, 'day'))
+        return this.#points.filter((point) => dayjs().isSame(point.dateFrom, 'day'));
       case Filter.PAST:
-        return this.#points.filter((point) => dayjs().isAfter(point.dateFrom, 'day'))
+        return this.#points.filter((point) => dayjs().isAfter(point.dateFrom, 'day'));
       default:
         return this.#points;
-      }
+    }
 
   }
 

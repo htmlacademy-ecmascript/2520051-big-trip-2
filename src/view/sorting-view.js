@@ -34,7 +34,7 @@ function createSortItems(sortType) {
     sortMenuList.push(
       `<div class="trip-sort__item  trip-sort__item--${sortItem.TYPE}">
       <input id="sort-${sortItem.TYPE}" class="trip-sort__input  visually-hidden" type="radio" 
-        name="trip-sort" value="sort-${sortItem.TYPE}" ${sortItem.DISABLED} ${sortItem.TYPE==sortType ? 'checked' : ''}>
+        name="trip-sort" value="sort-${sortItem.TYPE}" ${sortItem.DISABLED} ${sortItem.TYPE === sortType ? 'checked' : ''}>
       <label class="trip-sort__btn" for="sort-${sortItem.TYPE}" >${sortItem.HTML}</label>
     </div>`
     );
@@ -73,7 +73,6 @@ export default class SortMenuView extends AbstractView {
     if (evt.target.tagName !== 'INPUT') {
       return;
     }
-console.log(this.#handleSortTypeChange);
     this.#handleSortTypeChange(evt.target.value.replace('sort-', ''));
   };
 }

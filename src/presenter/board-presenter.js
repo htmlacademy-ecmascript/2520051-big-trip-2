@@ -1,4 +1,4 @@
-import {render} from '../framework/render.js';
+import {render, remove} from '../framework/render.js';
 import TripTableView from '../view/trip-table-view.js';
 import { DataStatus } from '../constants.js';
 
@@ -23,12 +23,12 @@ export default class TripTablePresenter {
   #offersModel = null;
   #destinationModel = null;
   #pointsModel = null;
-  
+
   #pointPresenters = new Map();
-  // #boardTrip = [];
-  // #sourcedBoardTasks = [];
   #currentSortType = SortType.DEFAULT;
   #currentFilter = Filter.DEFAULT;
+  #noTaskComponent = null;
+  #sortComponent = null;
 
   constructor(models) {
     this.#offersModel = models.offers;
@@ -56,13 +56,12 @@ export default class TripTablePresenter {
     this.#boardContainer = document.querySelector('.trip-events');
     this.#headerElement = document.querySelector('.trip-main');
     const filterControlElement = this.#headerElement.querySelector('.trip-controls__filters');
-    const tittleElement = this.#boardContainer.querySelector('h2');
 
     const infoPresenter = new InfoPresenter();
     infoPresenter.init(this.#headerElement);
-    
-    render(new FilterFormView(this.#currentFilter), filterControlElement);
-    render(new SortMenuView(this.#currentSortType, this.#handleSortTypeChange), tittleElement, RenderPosition.AFTEREND);
+
+    render(new FilterFormView(this.#currentFilter, this.#handleFilterChange), filterControlElement);
+    this.#sortComponent = new SortMenuView(this.#currentSortType, this.#handleSortTypeChange);
 
     this.#renderBoard();
 
@@ -76,8 +75,8 @@ export default class TripTablePresenter {
 
     this.#currentFilter = filter;
     this.#clearBoard();
-    this.#renderPoints(this.points);
-  }
+    this.#renderBoard();
+  };
 
   #handleSortTypeChange = (sortType) => {
     if (this.#currentSortType === sortType) {
@@ -89,23 +88,16 @@ export default class TripTablePresenter {
     this.#renderPoints(this.points);
   };
 
-  #sortByPrice = () => {
-    return [...this.#pointsModel.points].sort((a, b) => b.basePrice - a.basePrice);
-  };
+  #sortByPrice = () => [...this.#pointsModel.points].sort((a, b) => b.basePrice - a.basePrice);
 
-  #sortByTime = () => {
-    return [...this.#pointsModel.points].sort((a, b) => sortByTime(a, b));
-  };
+  #sortByTime = () => [...this.#pointsModel.points].sort((a, b) => sortByTime(a, b));
 
   #clearBoard(resetSortType = false) {
-    // const taskCount = this.tasks.length;
 
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
 
-    // remove(this.#sortComponent);
-    // remove(this.#noTaskComponent);
-    // remove(this.#loadMoreButtonComponent);
+    remove(this.#noTaskComponent);
 
     if (resetSortType) {
       this.#currentSortType = SortType.DEFAULT;
@@ -113,17 +105,26 @@ export default class TripTablePresenter {
   }
 
   #renderBoard() {
-
+    this.#noTaskComponent = null;
     if (this.points === undefined) {
-      render(new EmptyTableView(DataStatus.ERROR), this.#boardContainer);
-      return;
+      this.#noTaskComponent = new EmptyTableView(DataStatus.ERROR);
     }
     if (!this.points.length) {
-      render(new EmptyTableView(DataStatus.EMPTY), this.#boardContainer);
-      return;
+      this.#noTaskComponent = new EmptyTableView(DataStatus.EMPTY);
     }
 
+    if(this.#noTaskComponent) {
+      remove(this.#sortComponent);
+      render (this.#noTaskComponent, this.#boardContainer);
+      return;
+    }
+    this.#renderSorting();
     this.#renderPoints(this.points);
+  }
+
+  #renderSorting() {
+    const tittleElement = this.#boardContainer.querySelector('h2');
+    render(this.#sortComponent, tittleElement, RenderPosition.AFTEREND);
   }
 
   #renderPoints (points) {
@@ -154,7 +155,6 @@ export default class TripTablePresenter {
   }
 
   #handleViewAction = (actionType, updateType, update) => {
-    console.log('PointPresenter');
     switch (actionType) {
       case UserAction.UPDATE_TASK:
         this.#pointsModel.updatePoint(updateType, update);
@@ -166,18 +166,12 @@ export default class TripTablePresenter {
         this.#pointsModel.deletePoint(updateType, update);
         break;
     }
-    
-    // this.#boardTrip = updateItem(this.#boardTrip, updatedTask);
-    // this.#sourcedBoardTasks = updateItem(this.#sourcedBoardTasks, updatedTask);
-    // this.#pointPresenters.get(updatedTask.id).init(updatedTask);
+
   };
 
   #handleModelEvent = (updateType, data) => {
-    console.log(updateType, data);
-    // В зависимости от типа изменений решаем, что делать:
     switch (updateType) {
       case UpdateType.PATCH:
-        // - обновить часть списка (например, когда поменялось описание)
         this.#pointPresenters.get(data.id).init(data);
         break;
       case UpdateType.MINOR:
@@ -190,7 +184,4 @@ export default class TripTablePresenter {
         break;
     }
   };
-
-
-
 }
