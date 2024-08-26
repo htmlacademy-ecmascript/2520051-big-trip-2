@@ -34,7 +34,7 @@ export default class TripTablePresenter {
   #sortComponent = null;
   #loadingComponent = new LoadingView();
 
-  #isLoading = 3;
+  #isLoading = true;
 
   constructor(models) {
     this.#offersModel = models.offers;
@@ -61,9 +61,9 @@ export default class TripTablePresenter {
   }
 
   init() {
-    this.#offersModel.init();
-    this.#destinationModel.init();
-    this.#pointsModel.init();
+    // this.#offersModel.init();
+    // this.#destinationModel.init();
+    // this.#pointsModel.init();
 
     this.#boardContainer = document.querySelector('.trip-events');
     this.#headerElement = document.querySelector('.trip-main');
@@ -74,8 +74,17 @@ export default class TripTablePresenter {
 
     render(new FilterFormView(this.#currentFilter, this.#handleFilterChange), filterControlElement);
     this.#sortComponent = new SortMenuView(this.#currentSortType, this.#handleSortTypeChange);
-
-    this.#renderBoard();
+    
+    Promise.all([
+      this.#offersModel.init(),
+      this.#destinationModel.init()
+    ])
+    .then(
+      this.#pointsModel.init()
+    )
+    .finally(
+      this.#renderBoard()
+    )
 
   }
 
