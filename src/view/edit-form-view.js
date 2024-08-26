@@ -67,7 +67,7 @@ const createPhotoContainer = (photos) => {
   const photoItem = [];
   photos.forEach((photo) => {
     photoItem.push(
-      `<img class="event__photo" src="${photo.url}" alt="${photo.description}">`
+      `<img class="event__photo" src="${photo.src}" alt="${photo.description}">`
     );
   });
   return `<div class="event__photos-container">
@@ -76,6 +76,14 @@ const createPhotoContainer = (photos) => {
                       </div>
                     </div>`;
 };
+
+const createDestinationSection = (destination) =>
+  `<section class="event__section  event__section--destination">
+  <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+  <p class="event__destination-description">${destination.description}</p>
+  ${createPhotoContainer(destination.pictures)}
+</section>`;
+
 
 const createEditFormTemplate = (point, types, destination, destinations, offersByType) =>
   `<li class="trip-events__item">
@@ -131,11 +139,8 @@ ${createDestinationField(destinations)}
       </header>
       <section class="event__details">
 ${createOffersSection(point.offers, offersByType)}
-        <section class="event__section  event__section--destination">
-          <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-          <p class="event__destination-description">${destination.description}</p>
-          ${createPhotoContainer(destination.pictures)}
-        </section>
+
+${destination.description ? createDestinationSection(destination) : ''}
       </section>
     </form>
   </li>

@@ -5,6 +5,7 @@ import { DataStatus } from '../constants.js';
 import SortMenuView from '../view/sorting-view.js';
 import FilterFormView from '../view/filters-view.js';
 import EmptyTableView from '../view/empty-table-view.js';
+import LoadingView from '../view/loading-view.js';
 
 import { RenderPosition } from '../constants.js';
 
@@ -14,27 +15,34 @@ import { sortByTime } from '../utils.js';
 
 import { SortType, UpdateType, UserAction, Filter } from '../constants.js';
 
+import NewPointButtonView from '../view/new-point-button-view.js';
+
 
 export default class TripTablePresenter {
   #tableComponent = new TripTableView();
   #boardContainer = null;
   #headerElement = null;
 
-  #offersModel = null;
-  #destinationModel = null;
-  #pointsModel = null;
+  #offersModel;
+  #destinationModel;
+  #pointsModel;
 
   #pointPresenters = new Map();
   #currentSortType = SortType.DEFAULT;
   #currentFilter = Filter.DEFAULT;
   #noTaskComponent = null;
   #sortComponent = null;
+  #loadingComponent = new LoadingView();
+
+  #isLoading = 3;
 
   constructor(models) {
     this.#offersModel = models.offers;
     this.#destinationModel = models.destination;
     this.#pointsModel = models.points;
 
+    this.#destinationModel.addObserver(this.#handleModelEvent);
+    this.#offersModel.addObserver(this.#handleModelEvent);
     this.#pointsModel.addObserver(this.#handleModelEvent);
   }
 
@@ -53,6 +61,10 @@ export default class TripTablePresenter {
   }
 
   init() {
+    this.#offersModel.init();
+    this.#destinationModel.init();
+    this.#pointsModel.init();
+
     this.#boardContainer = document.querySelector('.trip-events');
     this.#headerElement = document.querySelector('.trip-main');
     const filterControlElement = this.#headerElement.querySelector('.trip-controls__filters');
@@ -65,8 +77,13 @@ export default class TripTablePresenter {
 
     this.#renderBoard();
 
-
   }
+
+  // createPoint() {
+  //   this.#currentSortType = SortType.DEFAULT;
+  //   // this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.ALL);
+  //   this.#newPointPresenter.init();
+  // }
 
   #handleFilterChange = (filter) => {
     if (this.#currentFilter === filter) {
@@ -98,6 +115,7 @@ export default class TripTablePresenter {
     this.#pointPresenters.clear();
 
     remove(this.#noTaskComponent);
+    remove(this.#loadingComponent);
 
     if (resetSortType) {
       this.#currentSortType = SortType.DEFAULT;
@@ -105,6 +123,11 @@ export default class TripTablePresenter {
   }
 
   #renderBoard() {
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
+
     this.#noTaskComponent = null;
     if (this.points === undefined) {
       this.#noTaskComponent = new EmptyTableView(DataStatus.ERROR);
@@ -120,6 +143,7 @@ export default class TripTablePresenter {
     }
     this.#renderSorting();
     this.#renderPoints(this.points);
+    this.#renderNewPointButton();
   }
 
   #renderSorting() {
@@ -136,6 +160,24 @@ export default class TripTablePresenter {
     });
   }
 
+  #renderLoading() {
+
+    this.#loadingComponent = new EmptyTableView(DataStatus.LOADING);
+    render (this.#loadingComponent, this.#boardContainer);
+
+  }
+
+  #renderNewPointButton() {
+    const siteHeaderElement = document.querySelector('.trip-main');
+    const newPointButtonComponent = new NewPointButtonView(
+      this.#handleNewPointButtonClick
+    );
+    render(newPointButtonComponent, siteHeaderElement);
+  }
+
+  #handleNewPointButtonClick() {
+    console.log('handleNewPointButtonClick');
+  }
 
   #handleModeChange = () => {
     this.#pointPresenters.forEach((presenter) => presenter.resetView());
@@ -181,6 +223,13 @@ export default class TripTablePresenter {
       case UpdateType.MAJOR:
         this.#clearBoard(true);
         this.#renderBoard();
+        break;
+      case UpdateType.INIT:
+        this.#isLoading--;
+        if (!this.#isLoading){
+          remove(this.#loadingComponent);
+          this.#renderBoard();
+        }
         break;
     }
   };

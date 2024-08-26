@@ -35,16 +35,18 @@ ${createFilterItems(currentFilter)}
 export default class FilterFormView extends AbstractView {
   #currentFilter = null;
   #handleFilterChange = null;
+  #disabled;
 
   constructor(currentFilter, onFilterGange){
     super();
     this.#currentFilter = currentFilter;
     this.#handleFilterChange = onFilterGange;
+
     this._restoreHandlers();
   }
 
   get template() {
-    return createFilterFormTemplate(this.#currentFilter);
+    return createFilterFormTemplate(this.#currentFilter, this.#disabled);
   }
 
   _restoreHandlers = () => {

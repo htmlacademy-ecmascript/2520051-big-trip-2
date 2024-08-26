@@ -1,9 +1,21 @@
 import Observable from '../framework/observable.js';
-import { offers } from '../mocks/offers.js';
+import { UpdateType } from '../constants.js';
 
 
 export default class OffersModel extends Observable {
-  #offers = offers;
+  #offers;
+  #offersApiService = null;
+  #types = [];
+
+  constructor(offersApiService) {
+    super();
+    this.#offersApiService = offersApiService;
+
+    this.#offersApiService.offers.then((offers) => {
+      this.#types = offers.map((offer) => offer.type);
+      console.log(offers);
+    });
+  }
 
   get offers () {
     return this.#offers;
@@ -14,8 +26,17 @@ export default class OffersModel extends Observable {
   }
 
   get types () {
+    return this.#types;
+  }
 
-    return this.#offers.map((offer) => offer.type);
+  async init() {
+    try {
+      const offers = await this.#offersApiService.offers;
+      this.#offers = offers;
+    } catch(err) {
+      this.#offers = [];
+    }
+    this._notify(UpdateType.INIT);
   }
 
   updateOffer(updateType, update) {
