@@ -22,7 +22,5 @@ export const getDifferenceDate = (finishTerm, startTerm) => {
   return `${minutes}M`;
 };
 
-// export const updateItem = (items, update) => items.map((item) => item.id === update.id ? update : item);
-
 export const sortByTime = (pointA, pointB) => dayjs(pointB.dateTo).diff(dayjs(pointB.dateFrom)) - dayjs(pointA.dateTo).diff(dayjs(pointA.dateFrom));
 

@@ -106,7 +106,7 @@ export default class PointPresenter {
       UpdateType.MINOR,
       point,
     );
-  }
+  };
 
   #handleDemoClick = () => {
     this.#editComponent.reset(this.#point);
