@@ -87,7 +87,7 @@ const createDestinationSection = (destination) =>
 
 const createEditFormTemplate = (point, types, destination, destinations, offersByType) =>
   `<li class="trip-events__item">
-    <form class="event event--edit" action="#" method="post">
+    <form class="event event--edit ${point.id ? '' : 'event--edit-new'}" action="#" method="post">
       <header class="event__header">
         <div class="event__type-wrapper">
           <label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -109,7 +109,7 @@ ${createTypeList(types)}
           ${point.type}
           </label>
           <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" 
-          value="${destination.name}" list="destination-list-1">
+          value="${destination ? destination.name : ''}" list="destination-list-1">
           <datalist id="destination-list-1">
 ${createDestinationField(destinations)}
           </datalist>
@@ -128,19 +128,21 @@ ${createDestinationField(destinations)}
             <span class="visually-hidden">Price</span>
             €
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${point.basePrice}">
+          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${point.basePrice ? point.basePrice : ''}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Delete</button>
-        <button class="event__rollup-btn" type="button">
+        <button class="event__reset-btn" type="reset">${point.id ? 'Delete' : 'Cancel'}</button>
+        ${ point.id ?
+        `<button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
-        </button>
+        </button>` : ''}
+
       </header>
       <section class="event__details">
 ${createOffersSection(point.offers, offersByType)}
 
-${destination.description ? createDestinationSection(destination) : ''}
+${destination ? destination.description ? createDestinationSection(destination) : '' : ''}
       </section>
     </form>
   </li>
@@ -161,14 +163,15 @@ export default class EditFormView extends AbstractStatefulView {
   #handleDeleteClick = null;
 
 
-  constructor (point, types, offersModel, destinations, onDemoClick, onFormSubmit, onDeleteClick) {
+  constructor (point, offersModel, destinations, onDemoClick, onFormSubmit, onDeleteClick) {
     super();
     this.#point = point;
     this.#offersModel = offersModel;
     this.#destinations = destinations;
     this.#hendleDemoClick = onDemoClick;
-    this.#types = types;
+    this.#types = this.#offersModel.types;
     this.#handleFormSubmit = onFormSubmit;
+    
     this.#handleDeleteClick = onDeleteClick;
 
     this._setState(this.#point);
@@ -176,6 +179,8 @@ export default class EditFormView extends AbstractStatefulView {
   }
 
   get template() {
+    console.log();
+    
     const pointDestination = this.#destinations.find((dest) => dest.id === this._state.destination);
     this.#offersByType = this.#offersModel.getOffersByType(this._state.type).offers;
     return createEditFormTemplate(
@@ -188,8 +193,11 @@ export default class EditFormView extends AbstractStatefulView {
   }
 
   _restoreHandlers = () => {
-    this.element.querySelector('.event__rollup-btn')
+    const rollupElement = this.element.querySelector('.event__rollup-btn');
+    if(rollupElement) {
+      this.element.querySelector('.event__rollup-btn')
       .addEventListener('click', this.#clickDemoHendler);
+    }
 
 
     this.element.querySelector('form')
@@ -220,7 +228,8 @@ export default class EditFormView extends AbstractStatefulView {
   };
 
   #clickDemoHendler = (evt) => {
-    evt.preventDefault();
+    console.log('clickDemoHendler');
+    
     this.#hendleDemoClick();
   };
 

@@ -2,37 +2,32 @@ import {render, replace, remove} from '../framework/render.js';
 
 import PointView from '../view/trip-point-view.js';
 import EditFormView from '../view/edit-form-view.js';
-import {UserAction, UpdateType} from '../constants.js';
+import {UserAction, UpdateType, RenderPosition, Mode} from '../constants.js';
 
-const Mode = {
-  DEFAULT: 'DEFAULT',
-  EDITING: 'EDITING',
-};
 
 export default class PointPresenter {
   #offersModel = null;
   #destinationModel = null;
 
   #tableElement = null;
-  #types = null;
   #destinations = null;
 
   #pointComponent = null;
   #editComponent = null;
 
   #point = null;
-  #mode = Mode.DEFAULT;
-
+  #mode;
+  #action;
   #handleDataChange = null;
   #handleModeChange = null;
 
-  constructor (offersModel, destinationModel, tableElement, onDataChange, onModeChange) {
+  constructor (offersModel, destinationModel, tableElement, onDataChange, onModeChange, mode = Mode.DEFAULT) {
     this.#offersModel = offersModel;
     this.#destinationModel = destinationModel;
     this.#tableElement = tableElement;
-    this.#types = this.#offersModel.types;
     this.#destinations = this.#destinationModel.destinations;
-
+    this.#mode = mode;
+    this.#action = mode === Mode.ADDING ? UserAction.ADD_TASK : UserAction.UPDATE_TASK;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
 
@@ -47,26 +42,32 @@ export default class PointPresenter {
     const prevPointComponent = this.#pointComponent;
     const prevEditComponent = this.#editComponent;
 
-    this.#pointComponent = new PointView(
-      this.#point,
-      offersAll,
-      destination,
-      () => {
-        this.#replacePointToEdit();
-        document.addEventListener('keydown', this.#escKeyDownHandler);
-      },
-      this.#handleFavoriteClick
-    );
+    if(this.#mode !== 'ADDING'){
+      this.#pointComponent = new PointView(
+        this.#point,
+        offersAll,
+        destination,
+        () => {
+          this.#replacePointToEdit();
+          document.addEventListener('keydown', this.#escKeyDownHandler);
+        },
+        this.#handleFavoriteClick
+      );
+    }
 
     this.#editComponent = new EditFormView(
       this.#point,
-      this.#types,
       this.#offersModel,
       this.#destinations,
       this.#handleDemoClick,
       this.#handleFormSubmit,
       this.#handleDeleteClick
     );
+    if (this.#mode === Mode.ADDING) {
+      render(this.#editComponent, this.#tableElement, RenderPosition.AFTERBEGIN);
+      document.addEventListener('keydown', this.#escKeyDownHandler);
+      return;
+    }
 
     if (prevPointComponent === null || prevEditComponent === null) {
       render(this.#pointComponent, this.#tableElement);
@@ -85,23 +86,34 @@ export default class PointPresenter {
   }
 
   resetView() {
+    if (this.#mode === Mode.ADDING) {
+      remove(this.#editComponent)
+      return;
+    }
     if (this.#mode !== Mode.DEFAULT) {
       this.#editComponent.reset(this.#point);
       this.#replaceEditToPoint();
-    }
+    } 
   }
 
   #handleFormSubmit = (point) => {
     this.#handleDataChange(
-      UserAction.UPDATE_TASK,
+      this.#action,
       UpdateType.MINOR,
       {...point},
     );
-    this.#replaceEditToPoint();
+    if(this.#mode !== Mode.ADDING){
+
+      this.#replaceEditToPoint();
+    }
   };
 
   #handleDeleteClick = (point) => {
-    this.#handleDataChange(
+    if(this.#mode = Mode.ADDING){
+      this.#removeAddingForm();
+      return
+    }
+      this.#handleDataChange(
       UserAction.DELETE_TASK,
       UpdateType.MINOR,
       point,
@@ -115,7 +127,7 @@ export default class PointPresenter {
 
   #handleFavoriteClick = () => {
     this.#handleDataChange(
-      UserAction.UPDATE_TASK,
+      this.#action,
       UpdateType.MINOR,
       {...this.#point, isFavorite: !this.#point.isFavorite}
     );
@@ -132,12 +144,22 @@ export default class PointPresenter {
     this.#handleModeChange();
     this.#mode = Mode.EDITING;
   }
-
+  #removeAddingForm() {
+    document.querySelector('.trip-main__event-add-btn').disabled = false;
+    remove(this.#editComponent);
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
+}
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
       this.#editComponent.reset(this.#point);
-      this.#replaceEditToPoint();
+      console.log(this.#editComponent);
+      if(this.#mode = Mode.ADDING){
+        this.#removeAddingForm();
+      } else {
+
+        this.#replaceEditToPoint();
+      }
     }
   };
 

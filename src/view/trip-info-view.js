@@ -18,7 +18,7 @@ function createInfoTemplate() {
 }
 
 export default class InfoView extends AbstractView {
-  get template() {
+  get template() {    
     return createInfoTemplate();
   }
 }

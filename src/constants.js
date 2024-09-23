@@ -1,5 +1,5 @@
 export const AUTHORIZATION = 'Basic if85f74ls8';
-export const END_POINT = 'https://22.objects.htmlacademy.pro/big-trip';
+export const END_POINT = 'https://23.objects.htmlacademy.pro/big-trip';
 
 export const Url = {
   POINTS: 'points',
@@ -61,4 +61,10 @@ export const UpdateType = {
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
   INIT: 'INIT',
+};
+
+export const Mode = {
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING',
+  ADDING: 'ADDING'
 };

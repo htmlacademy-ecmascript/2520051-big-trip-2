@@ -13,40 +13,52 @@ import InfoPresenter from './info-presenter.js';
 import PointPresenter from './point-presenter.js';
 import { sortByTime } from '../utils.js';
 
-import { SortType, UpdateType, UserAction, Filter } from '../constants.js';
+import { SortType, UpdateType, UserAction, Filter, Mode } from '../constants.js';
 
 import NewPointButtonView from '../view/new-point-button-view.js';
+import EditFormView from '../view/edit-form-view.js';
 
 
 export default class TripTablePresenter {
   #tableComponent = new TripTableView();
   #boardContainer = null;
   #headerElement = null;
+  #infoPresenter = null;
 
   #offersModel;
   #destinationModel;
   #pointsModel;
 
+  #points = null;
   #pointPresenters = new Map();
+  #newPointPresenter = null;
   #currentSortType = SortType.DEFAULT;
   #currentFilter = Filter.DEFAULT;
-  #noTaskComponent = null;
+  #filterComponent = null;
+  #noPointsComponent = null;
   #sortComponent = null;
   #loadingComponent = new LoadingView();
+  #newPointButton = null;
 
-  #isLoading = true;
+  #isLoading = 3;
 
   constructor(models) {
     this.#offersModel = models.offers;
     this.#destinationModel = models.destination;
     this.#pointsModel = models.points;
-
     this.#destinationModel.addObserver(this.#handleModelEvent);
     this.#offersModel.addObserver(this.#handleModelEvent);
     this.#pointsModel.addObserver(this.#handleModelEvent);
   }
 
-  get points() {
+  init() {
+  this.#renderBoard();
+  this.#offersModel.init(),
+  this.#destinationModel.init(),
+  this.#pointsModel.init()
+  }
+
+  #getPoints() {
 
     this.#pointsModel.dataFilter = this.#currentFilter;
 
@@ -55,112 +67,75 @@ export default class TripTablePresenter {
         return this.#sortByTime();
       case SortType.PRICE:
         return this.#sortByPrice();
-    }
-
-    return this.#pointsModel.points;
-  }
-
-  init() {
-    // this.#offersModel.init();
-    // this.#destinationModel.init();
-    // this.#pointsModel.init();
-
-    this.#boardContainer = document.querySelector('.trip-events');
-    this.#headerElement = document.querySelector('.trip-main');
-    const filterControlElement = this.#headerElement.querySelector('.trip-controls__filters');
-
-    const infoPresenter = new InfoPresenter();
-    infoPresenter.init(this.#headerElement);
-
-    render(new FilterFormView(this.#currentFilter, this.#handleFilterChange), filterControlElement);
-    this.#sortComponent = new SortMenuView(this.#currentSortType, this.#handleSortTypeChange);
-    
-    Promise.all([
-      this.#offersModel.init(),
-      this.#destinationModel.init()
-    ])
-    .then(
-      this.#pointsModel.init()
-    )
-    .finally(
-      this.#renderBoard()
-    )
-
-  }
-
-  // createPoint() {
-  //   this.#currentSortType = SortType.DEFAULT;
-  //   // this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.ALL);
-  //   this.#newPointPresenter.init();
-  // }
-
-  #handleFilterChange = (filter) => {
-    if (this.#currentFilter === filter) {
-      return;
-    }
-
-    this.#currentFilter = filter;
-    this.#clearBoard();
-    this.#renderBoard();
-  };
-
-  #handleSortTypeChange = (sortType) => {
-    if (this.#currentSortType === sortType) {
-      return;
-    }
-
-    this.#currentSortType = sortType;
-    this.#clearBoard();
-    this.#renderPoints(this.points);
-  };
-
-  #sortByPrice = () => [...this.#pointsModel.points].sort((a, b) => b.basePrice - a.basePrice);
-
-  #sortByTime = () => [...this.#pointsModel.points].sort((a, b) => sortByTime(a, b));
-
-  #clearBoard(resetSortType = false) {
-
-    this.#pointPresenters.forEach((presenter) => presenter.destroy());
-    this.#pointPresenters.clear();
-
-    remove(this.#noTaskComponent);
-    remove(this.#loadingComponent);
-
-    if (resetSortType) {
-      this.#currentSortType = SortType.DEFAULT;
+      default:
+        return this.#pointsModel.points;
     }
   }
 
   #renderBoard() {
+    this.#boardContainer = document.querySelector('.trip-events');
+    this.#headerElement = document.querySelector('.trip-main');
+    const filterControlElement = this.#headerElement.querySelector('.trip-controls__filters');
+    if(this.#filterComponent === null) {
+      this.#filterComponent = new FilterFormView(this.#currentFilter, this.#handleFilterChange);
+      render(this.#filterComponent, filterControlElement);
+    }
+    if(this.#newPointButton === null){
+      this.#renderNewPointButton();
+    }
     if (this.#isLoading) {
       this.#renderLoading();
       return;
     }
-
-    this.#noTaskComponent = null;
-    if (this.points === undefined) {
-      this.#noTaskComponent = new EmptyTableView(DataStatus.ERROR);
+    this.#points = this.#getPoints();
+    
+    this.#renderEmpty();
+    if(this.#noPointsComponent === null){
+      this.#renderList();
+      
     }
-    if (!this.points.length) {
-      this.#noTaskComponent = new EmptyTableView(DataStatus.EMPTY);
-    }
-
-    if(this.#noTaskComponent) {
-      remove(this.#sortComponent);
-      render (this.#noTaskComponent, this.#boardContainer);
-      return;
-    }
-    this.#renderSorting();
-    this.#renderPoints(this.points);
-    this.#renderNewPointButton();
   }
+  #clearBoard(resetSortType = false) {
+    this.#pointPresenters.forEach((presenter) => presenter.destroy());
+    this.#pointPresenters.clear();
+    this.#removeNewForm();
+    remove(this.#noPointsComponent);
+    remove(this.#loadingComponent);
+    if (resetSortType) {
+      this.#currentSortType = SortType.DEFAULT;
+    }
 
-  #renderSorting() {
+  }
+  #renderList() {
+    if(this.#sortComponent === null){
+      this.#sortComponent = new SortMenuView(this.#currentSortType, this.#handleSortTypeChange);
+      this.#renderSorting();
+    }
+    if(this.#infoPresenter === null){
+      this.#infoPresenter = new InfoPresenter();
+      this.#infoPresenter.init(this.#headerElement);
+    }
+    this.#renderPoints(this.#points);
+  }
+  #renderEmpty() {
+    this.#noPointsComponent = null;
+    if (this.#points === undefined) {
+      this.#noPointsComponent = new EmptyTableView(DataStatus.ERROR);
+    }
+    else if (!this.#points.length) {
+      this.#noPointsComponent = new EmptyTableView(DataStatus.EMPTY);
+    }
+    if(this.#noPointsComponent !== null) {
+      remove(this.#sortComponent);
+      render (this.#noPointsComponent, this.#boardContainer);
+    }
+  }
+  #renderSorting() {    
     const tittleElement = this.#boardContainer.querySelector('h2');
     render(this.#sortComponent, tittleElement, RenderPosition.AFTEREND);
   }
-
   #renderPoints (points) {
+    
     render(this.#tableComponent, this.#boardContainer);
     points.forEach((point) => {
       this.#renderPoint(
@@ -168,30 +143,6 @@ export default class TripTablePresenter {
       );
     });
   }
-
-  #renderLoading() {
-
-    this.#loadingComponent = new EmptyTableView(DataStatus.LOADING);
-    render (this.#loadingComponent, this.#boardContainer);
-
-  }
-
-  #renderNewPointButton() {
-    const siteHeaderElement = document.querySelector('.trip-main');
-    const newPointButtonComponent = new NewPointButtonView(
-      this.#handleNewPointButtonClick
-    );
-    render(newPointButtonComponent, siteHeaderElement);
-  }
-
-  #handleNewPointButtonClick() {
-    console.log('handleNewPointButtonClick');
-  }
-
-  #handleModeChange = () => {
-    this.#pointPresenters.forEach((presenter) => presenter.resetView());
-  };
-
   #renderPoint(point) {
 
     const pointPresenter = new PointPresenter(
@@ -204,6 +155,79 @@ export default class TripTablePresenter {
     pointPresenter.init(point);
     this.#pointPresenters.set(point.id, pointPresenter);
   }
+
+
+  #renderLoading() {
+
+    this.#loadingComponent = new EmptyTableView(DataStatus.LOADING);
+    render (this.#loadingComponent, this.#boardContainer);
+
+  }
+
+  #renderNewPointButton() {
+    
+    const siteHeaderElement = document.querySelector('.trip-main');
+    this.#newPointButton = new NewPointButtonView(
+      this.#handleNewPointButtonClick
+    );
+    render(this.#newPointButton, siteHeaderElement);
+  
+  }
+  #handleFilterChange() {
+
+  }
+  
+  #handleNewPointButtonClick = () => {
+    this.#newPointPresenter = new PointPresenter(
+      this.#offersModel,
+      this.#destinationModel,
+      this.#tableComponent.element,
+      this.#handleViewAction,
+      this.#handleModeChange,
+      Mode.ADDING
+    )
+    const point = {
+      id: '',
+      type: 'flight',
+      base_price: 0,
+      date_from: new Date(), 
+      date_to: new Date(), 
+      destination: '', 
+      is_favorite: false,
+      offers: []
+    }
+    this.#newPointButton.element.disabled = true;
+    this.#newPointPresenter.init(point)
+  }
+
+  #sortByPrice = () => [...this.#pointsModel.points].sort((a, b) => b.basePrice - a.basePrice);
+
+  #sortByTime = () => [...this.#pointsModel.points].sort((a, b) => sortByTime(a, b));
+
+  #removeNewForm = () => {
+
+    if(this.#newPointPresenter === null){
+      return;
+    }
+    this.#newPointPresenter.resetView();
+    this.#newPointButton.element.disabled = false;
+    this.#newPointPresenter = null;
+  }
+  #handleModeChange = () => {
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+    this.#removeNewForm();
+    
+  };
+  #handleSortTypeChange = (sortType) => {
+    if (this.#currentSortType === sortType) {
+      return;
+    }
+
+    this.#currentSortType = sortType;
+    this.#clearBoard();
+    this.#points = this.#getPoints();
+    this.#renderList();
+  };
 
   #handleViewAction = (actionType, updateType, update) => {
     switch (actionType) {
@@ -236,7 +260,7 @@ export default class TripTablePresenter {
       case UpdateType.INIT:
         this.#isLoading--;
         if (!this.#isLoading){
-          remove(this.#loadingComponent);
+          this.#clearBoard();
           this.#renderBoard();
         }
         break;
