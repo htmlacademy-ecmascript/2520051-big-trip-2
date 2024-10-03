@@ -1,16 +1,26 @@
 import AbstractView from '../framework/view/abstract-view.js';
+import { DateFormat } from '../constants.js';
+import { getDatetimeFormat } from '../utils.js';
+import dayjs from 'dayjs';
 
-function createInfoTemplate() {
+function createTripInfoDates (dateFrom, dateTo) {
+  if(dayjs(dateFrom).isSame(dateTo, 'month')){
+    return (`${getDatetimeFormat(dateFrom, DateFormat.HUMAN)}&nbsp;—&nbsp;${getDatetimeFormat(dateTo, DateFormat.DAY)}`);
+  }
+  return (`${getDatetimeFormat(dateFrom, DateFormat.HUMAN)}&nbsp;—&nbsp;${getDatetimeFormat(dateTo, DateFormat.HUMAN)}`);
+}
+
+function createInfoTemplate(totalPrice, dateFrom, dateTo, route) {
   return (
     `<section class="trip-main__trip-info  trip-info">
     <div class="trip-info__main">
-      <h1 class="trip-info__title">Amsterdam — Chamonix — Geneva</h1>
+      <h1 class="trip-info__title">${route.join(' — ')}</h1>
 
-      <p class="trip-info__dates">Mar 18&nbsp;—&nbsp;20</p>
+      <p class="trip-info__dates">${createTripInfoDates(dateFrom, dateTo)}</p>
     </div>
 
     <p class="trip-info__cost">
-      Total: €&nbsp;<span class="trip-info__cost-value">1230</span>
+      Total: €&nbsp;<span class="trip-info__cost-value">${totalPrice}</span>
     </p>
   </section>
 `
@@ -18,7 +28,20 @@ function createInfoTemplate() {
 }
 
 export default class InfoView extends AbstractView {
-  get template() {    
-    return createInfoTemplate();
+  #totalPrice;
+  #dateFrom;
+  #dateTo;
+  #route;
+
+  constructor(totalPrice, route, dateFrom, dateTo){
+    super();
+    this.#totalPrice = totalPrice;
+    this.#dateFrom = dateFrom;
+    this.#dateTo = dateTo;
+    this.#route = route;
+  }
+
+  get template() {
+    return createInfoTemplate(this.#totalPrice, this.#dateFrom, this.#dateTo, this.#route);
   }
 }

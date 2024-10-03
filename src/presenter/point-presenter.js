@@ -79,21 +79,40 @@ export default class PointPresenter {
     }
 
     if (this.#mode === Mode.EDITING) {
-      replace(this.#editComponent, prevEditComponent);
+      replace(this.#pointComponent, prevEditComponent);
+      this.#mode = Mode.DEFAULT;
     }
     remove(prevPointComponent);
     remove(prevEditComponent);
   }
 
+  setSaving() {
+    if (this.#mode === Mode.EDITING) {
+      this.#editComponent.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDITING) {
+      this.#editComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  }
+
   resetView() {
     if (this.#mode === Mode.ADDING) {
-      remove(this.#editComponent)
+      remove(this.#editComponent);
       return;
     }
     if (this.#mode !== Mode.DEFAULT) {
       this.#editComponent.reset(this.#point);
       this.#replaceEditToPoint();
-    } 
+    }
   }
 
   #handleFormSubmit = (point) => {
@@ -109,11 +128,11 @@ export default class PointPresenter {
   };
 
   #handleDeleteClick = (point) => {
-    if(this.#mode = Mode.ADDING){
+    if(this.#mode === Mode.ADDING){
       this.#removeAddingForm();
-      return
+      return;
     }
-      this.#handleDataChange(
+    this.#handleDataChange(
       UserAction.DELETE_TASK,
       UpdateType.MINOR,
       point,
@@ -144,17 +163,18 @@ export default class PointPresenter {
     this.#handleModeChange();
     this.#mode = Mode.EDITING;
   }
+
   #removeAddingForm() {
     document.querySelector('.trip-main__event-add-btn').disabled = false;
     remove(this.#editComponent);
     document.removeEventListener('keydown', this.#escKeyDownHandler);
-}
+  }
+
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
       this.#editComponent.reset(this.#point);
-      console.log(this.#editComponent);
-      if(this.#mode = Mode.ADDING){
+      if (this.#mode === Mode.ADDING){
         this.#removeAddingForm();
       } else {
 

@@ -10,6 +10,8 @@ export const Url = {
 export const Method = {
   GET: 'GET',
   PUT: 'PUT',
+  POST: 'POST',
+  DELETE: 'DELETE'
 };
 
 export const RenderPosition = {
@@ -21,10 +23,11 @@ export const RenderPosition = {
 
 export const DateFormat = {
   DATE_TIME: 'YYYY-MM-DDTHH:mm',
-  HUMAN: 'D MMM',
+  HUMAN: 'MMM D',
   TIME: 'HH:mm',
   DATE_DB: 'YYYY-MM-DD',
-  BRITAIN: 'DD/MM/YY HH:mm'
+  BRITAIN: 'DD/MM/YY HH:mm',
+  DAY: 'D'
 };
 
 export const DataStatus = {
