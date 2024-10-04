@@ -87,7 +87,7 @@ export default class PointPresenter {
   }
 
   setSaving() {
-    if (this.#mode === Mode.EDITING) {
+    if (this.#mode === Mode.EDITING || this.#mode === Mode.ADDING) {
       this.#editComponent.updateElement({
         isDisabled: true,
         isSaving: true,
@@ -115,16 +115,33 @@ export default class PointPresenter {
     }
   }
 
+  setAborting() {
+    // if (this.#mode === Mode.DEFAULT) {
+    //   this.#pointComponent.shake();
+    //   return;
+    // }
+
+    const resetFormState = () => {
+      this.#editComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#editComponent.shake(resetFormState);
+  }
+
   #handleFormSubmit = (point) => {
     this.#handleDataChange(
       this.#action,
       UpdateType.MINOR,
       {...point},
     );
-    if(this.#mode !== Mode.ADDING){
+    // if(this.#mode !== Mode.ADDING){
 
-      this.#replaceEditToPoint();
-    }
+    //   this.#replaceEditToPoint();
+    // }
   };
 
   #handleDeleteClick = (point) => {

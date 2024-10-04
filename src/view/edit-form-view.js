@@ -85,8 +85,13 @@ const createDestinationSection = (destination) =>
 </section>`;
 
 
-const createEditFormTemplate = (point, types, destination, destinations, offersByType) =>
-  `<li class="trip-events__item">
+const createEditFormTemplate = (point, types, destination, destinations, offersByType) => {
+  console.log(point);
+  const isDisabled = point.isDisabled ? point.isDisabled : '';
+  const isSaving = point.isSaving ? point.isSaving : '';
+  const isDeleting = point.isDeleting ? point.isDeleting : '';
+  
+  return `<li class="trip-events__item">
     <form class="event event--edit ${point.id ? '' : 'event--edit-new'}" action="#" method="post">
       <header class="event__header">
         <div class="event__type-wrapper">
@@ -131,8 +136,8 @@ ${createDestinationField(destinations)}
           <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${point.basePrice ? point.basePrice : ''}">
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">${point.id ? 'Delete' : 'Cancel'}</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit"  ${isDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
+        <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${point.id ? (isDeleting ? 'Deleting...' : 'Delete') : 'Cancel'}</button>
           ${ point.id ?
     `<button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
@@ -147,7 +152,7 @@ ${createDestinationField(destinations)}
     </form>
   </li>
 `;
-
+          }
 
 export default class EditFormView extends AbstractStatefulView {
   #point = null;
