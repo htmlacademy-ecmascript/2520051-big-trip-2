@@ -86,11 +86,10 @@ const createDestinationSection = (destination) =>
 
 
 const createEditFormTemplate = (point, types, destination, destinations, offersByType) => {
-  console.log(point);
   const isDisabled = point.isDisabled ? point.isDisabled : '';
   const isSaving = point.isSaving ? point.isSaving : '';
   const isDeleting = point.isDeleting ? point.isDeleting : '';
-  
+
   return `<li class="trip-events__item">
     <form class="event event--edit ${point.id ? '' : 'event--edit-new'}" action="#" method="post">
       <header class="event__header">
@@ -152,7 +151,7 @@ ${createDestinationField(destinations)}
     </form>
   </li>
 `;
-          }
+};
 
 export default class EditFormView extends AbstractStatefulView {
   #point = null;
