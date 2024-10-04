@@ -6,15 +6,15 @@ import 'flatpickr/dist/flatpickr.min.css';
 
 const createOfferItem = (pointOffers, offers) => {
   const listItems = [];
-  for (let i = 0; i < offers.length; i++) {
-    const isChecked = pointOffers.includes(offers[i].id);
+  for (const offer of offers) {
+    const isChecked = pointOffers.includes(offer.id);
     listItems.push(
       `<div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${i + 1}" type="checkbox" name="event-offer-luggage" ${isChecked ? 'checked=""' : ''}>
-    <label class="event__offer-label" for="event-offer-luggage-${i + 1}">
-      <span class="event__offer-title">${offers[i].title}</span>
+    <input class="event__offer-checkbox  visually-hidden" id="${offer.id}" type="checkbox" name="event-offer-luggage" ${isChecked ? 'checked=""' : ''}>
+    <label class="event__offer-label" for="${offer.id}">
+      <span class="event__offer-title">${offer.title}</span>
       +€&nbsp;
-      <span class="event__offer-price">${offers[i].price}</span>
+      <span class="event__offer-price">${offer.price}</span>
     </label>
   </div>`
     );
@@ -85,9 +85,13 @@ const createDestinationSection = (destination) =>
 </section>`;
 
 
-const createEditFormTemplate = (point, types, destination, destinations, offersByType) =>
-  `<li class="trip-events__item">
-    <form class="event event--edit" action="#" method="post">
+const createEditFormTemplate = (point, types, destination, destinations, offersByType) => {
+  const isDisabled = point.isDisabled ? point.isDisabled : '';
+  const isSaving = point.isSaving ? point.isSaving : '';
+  const isDeleting = point.isDeleting ? point.isDeleting : '';
+
+  return `<li class="trip-events__item">
+    <form class="event event--edit ${point.id ? '' : 'event--edit-new'}" action="#" method="post">
       <header class="event__header">
         <div class="event__type-wrapper">
           <label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -109,7 +113,7 @@ ${createTypeList(types)}
           ${point.type}
           </label>
           <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" 
-          value="${destination.name}" list="destination-list-1">
+          value="${destination ? destination.name : ''}" list="destination-list-1">
           <datalist id="destination-list-1">
 ${createDestinationField(destinations)}
           </datalist>
@@ -117,10 +121,10 @@ ${createDestinationField(destinations)}
 
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-1">From</label>
-          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${getDatetimeFormat(point.dateFrom, DateFormat.BRITAIN)}">
+          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${point.dateFrom ? getDatetimeFormat(point.dateFrom, DateFormat.BRITAIN) : ''}">
           —
           <label class="visually-hidden" for="event-end-time-1">To</label>
-          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${getDatetimeFormat(point.dateTo, DateFormat.BRITAIN)}">
+          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${point.dateTo ? getDatetimeFormat(point.dateTo, DateFormat.BRITAIN) : ''}">
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -128,24 +132,26 @@ ${createDestinationField(destinations)}
             <span class="visually-hidden">Price</span>
             €
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${point.basePrice}">
+          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${point.basePrice ? point.basePrice : ''}">
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Delete</button>
-        <button class="event__rollup-btn" type="button">
+        <button class="event__save-btn  btn  btn--blue" type="submit"  ${isDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
+        <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${point.id ? (isDeleting ? 'Deleting...' : 'Delete') : 'Cancel'}</button>
+          ${ point.id ?
+    `<button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
-        </button>
+        </button>` : ''}
+
       </header>
       <section class="event__details">
-${createOffersSection(point.offers, offersByType)}
+        ${createOffersSection(point.offers, offersByType)}
 
-${destination.description ? createDestinationSection(destination) : ''}
+        ${destination ? (destination.description ? createDestinationSection(destination) : '') : ''}
       </section>
     </form>
   </li>
 `;
-
+};
 
 export default class EditFormView extends AbstractStatefulView {
   #point = null;
@@ -161,14 +167,15 @@ export default class EditFormView extends AbstractStatefulView {
   #handleDeleteClick = null;
 
 
-  constructor (point, types, offersModel, destinations, onDemoClick, onFormSubmit, onDeleteClick) {
+  constructor (point, offersModel, destinations, onDemoClick, onFormSubmit, onDeleteClick) {
     super();
     this.#point = point;
     this.#offersModel = offersModel;
     this.#destinations = destinations;
     this.#hendleDemoClick = onDemoClick;
-    this.#types = types;
+    this.#types = this.#offersModel.types;
     this.#handleFormSubmit = onFormSubmit;
+
     this.#handleDeleteClick = onDeleteClick;
 
     this._setState(this.#point);
@@ -188,8 +195,11 @@ export default class EditFormView extends AbstractStatefulView {
   }
 
   _restoreHandlers = () => {
-    this.element.querySelector('.event__rollup-btn')
-      .addEventListener('click', this.#clickDemoHendler);
+    const rollupElement = this.element.querySelector('.event__rollup-btn');
+    if(rollupElement) {
+      this.element.querySelector('.event__rollup-btn')
+        .addEventListener('click', this.#clickDemoHendler);
+    }
 
 
     this.element.querySelector('form')
@@ -201,6 +211,14 @@ export default class EditFormView extends AbstractStatefulView {
     this.element.querySelector('.event__reset-btn')
       .addEventListener('click', this.#formDeleteClickHandler);
 
+    const eventOfferLuggage = this.element.querySelectorAll('[name=event-offer-luggage]');
+    eventOfferLuggage.forEach((elem) =>
+      elem.addEventListener('change', () =>
+        this.updateElement({...this._state,
+          offers: Array.from(eventOfferLuggage).filter((chb)=>chb.checked).map((chb)=>chb.id)
+        })
+      )
+    );
 
     this.element.querySelector('#event-destination-1').addEventListener('focus', (evt) => {
       this.#prevDestination = evt.target.value;
@@ -215,12 +233,16 @@ export default class EditFormView extends AbstractStatefulView {
     });
 
     this.element.querySelector('#event-destination-1').addEventListener('input', this.#destinationChangeHandler);
+    this.element.querySelector('.event__input--price').addEventListener('change',
+      (evt) => {
+        this.updateElement({...this._state, basePrice: +evt.target.value});
+      }
+    );
 
     this.#setDatePicker();
   };
 
-  #clickDemoHendler = (evt) => {
-    evt.preventDefault();
+  #clickDemoHendler = () => {
     this.#hendleDemoClick();
   };
 

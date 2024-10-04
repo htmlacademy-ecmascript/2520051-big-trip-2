@@ -1,19 +1,14 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
-const filters = [
-  'everything',
-  'future',
-  'present',
-  'past'
-];
-
-function createFilterItems(currentFilter){
+function createFilterItems(currentFilter, filterMap){
   const filterItems = [];
-  filters.forEach((filter) => {
+  Object.keys(filterMap).forEach((filter) => {
     filterItems.push(
       `
       <div class="trip-filters__filter">
-        <input id="filter-${filter}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${filter}" ${ filter === currentFilter ? 'checked' : ''}>
+        <input id="filter-${filter}" class="trip-filters__filter-input  visually-hidden" type="radio" 
+        name="trip-filter" value="${filter}" ${ filter === currentFilter ? 'checked' : ''}
+        ${ filterMap[filter] ? '' : 'disabled'}>
         <label class="trip-filters__filter-label" for="filter-${filter}">${filter}</label>
       </div>
       `
@@ -22,10 +17,10 @@ function createFilterItems(currentFilter){
   return (filterItems.join(''));
 }
 
-function createFilterFormTemplate(currentFilter) {
+function createFilterFormTemplate(currentFilter, filterMap) {
   return (
     `<form class="trip-filters" action="#" method="get">
-${createFilterItems(currentFilter)}
+${createFilterItems(currentFilter, filterMap)}
     <button class="visually-hidden" type="submit">Accept filter</button>
   </form>
 `
@@ -33,20 +28,21 @@ ${createFilterItems(currentFilter)}
 }
 
 export default class FilterFormView extends AbstractView {
-  #currentFilter = null;
-  #handleFilterChange = null;
-  #disabled;
+  #currentFilter;
+  #handleFilterChange;
+  #filterMap;
 
-  constructor(currentFilter, onFilterGange){
+  constructor(currentFilter, onFilterGange, filterMap){
     super();
     this.#currentFilter = currentFilter;
     this.#handleFilterChange = onFilterGange;
+    this.#filterMap = filterMap;
 
     this._restoreHandlers();
   }
 
   get template() {
-    return createFilterFormTemplate(this.#currentFilter, this.#disabled);
+    return createFilterFormTemplate(this.#currentFilter, this.#filterMap);
   }
 
   _restoreHandlers = () => {

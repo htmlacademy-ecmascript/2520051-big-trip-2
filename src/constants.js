@@ -1,5 +1,5 @@
 export const AUTHORIZATION = 'Basic if85f74ls8';
-export const END_POINT = 'https://22.objects.htmlacademy.pro/big-trip';
+export const END_POINT = 'https://23.objects.htmlacademy.pro/big-trip';
 
 export const Url = {
   POINTS: 'points',
@@ -10,6 +10,8 @@ export const Url = {
 export const Method = {
   GET: 'GET',
   PUT: 'PUT',
+  POST: 'POST',
+  DELETE: 'DELETE'
 };
 
 export const RenderPosition = {
@@ -21,10 +23,11 @@ export const RenderPosition = {
 
 export const DateFormat = {
   DATE_TIME: 'YYYY-MM-DDTHH:mm',
-  HUMAN: 'D MMM',
+  HUMAN: 'MMM D',
   TIME: 'HH:mm',
   DATE_DB: 'YYYY-MM-DD',
-  BRITAIN: 'DD/MM/YY HH:mm'
+  BRITAIN: 'DD/MM/YY HH:mm',
+  DAY: 'D'
 };
 
 export const DataStatus = {
@@ -61,4 +64,10 @@ export const UpdateType = {
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
   INIT: 'INIT',
+};
+
+export const Mode = {
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING',
+  ADDING: 'ADDING'
 };
