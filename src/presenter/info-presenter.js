@@ -22,9 +22,9 @@ export default class InfoPresenter {
     this.#sortPoints.forEach((point) => {
       total += point.basePrice;
       const offerList = this.#offersModel.getOffersByType(point.type).offers;
-      point.offers.forEach((pointOffer) =>
-        total += offerList.find((offer) => offer.id === pointOffer).price
-      );
+      for(let i = 0; i < point.offers.lenght; i++){
+        total += offerList.find((offer) => offer.id === point.offers[i]).price;
+      }
     });
     const dateFrom = this.#sortPoints[0].dateFrom;
     const dateTo = this.#sortPoints.at(-1).dateTo;

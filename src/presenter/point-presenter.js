@@ -42,7 +42,7 @@ export default class PointPresenter {
     const prevPointComponent = this.#pointComponent;
     const prevEditComponent = this.#editComponent;
 
-    if(this.#mode !== 'ADDING'){
+    if(this.#mode !== Mode.ADDING){
       this.#pointComponent = new PointView(
         this.#point,
         offersAll,
@@ -116,11 +116,6 @@ export default class PointPresenter {
   }
 
   setAborting() {
-    // if (this.#mode === Mode.DEFAULT) {
-    //   this.#pointComponent.shake();
-    //   return;
-    // }
-
     const resetFormState = () => {
       this.#editComponent.updateElement({
         isDisabled: false,
@@ -138,10 +133,6 @@ export default class PointPresenter {
       UpdateType.MINOR,
       {...point},
     );
-    // if(this.#mode !== Mode.ADDING){
-
-    //   this.#replaceEditToPoint();
-    // }
   };
 
   #handleDeleteClick = (point) => {

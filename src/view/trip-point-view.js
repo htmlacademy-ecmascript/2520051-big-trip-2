@@ -62,8 +62,8 @@ export default class PointView extends AbstractView {
   #point = null;
   #offers = null;
   #destination = null;
-  #hendleEditClick = null;
-  #hendleFavoriteClick = null;
+  #handleEditClick = null;
+  #handleFavoriteClick = null;
   #offersByType = null;
 
   constructor(point, offersAll, destination, onEditClick, onFavoriteClick) {
@@ -71,29 +71,29 @@ export default class PointView extends AbstractView {
     this.#point = point;
     this.#offers = offersAll;
     this.#destination = destination;
-    this.#hendleEditClick = onEditClick;
-    this.#hendleFavoriteClick = onFavoriteClick;
+    this.#handleEditClick = onEditClick;
+    this.#handleFavoriteClick = onFavoriteClick;
 
     this.#offersByType = this.#offers.find((offer) => offer.type === this.#point.type);
 
     this.element.querySelector('.event__rollup-btn')
-      .addEventListener('click', this.#clickEditHendler);
+      .addEventListener('click', this.#clickEditHandler);
 
     this.element.querySelector('.event__favorite-btn')
-      .addEventListener('click', this.#clickFavoriteHendler);
+      .addEventListener('click', this.#clickFavoriteHandler);
   }
 
   get template() {
     return createPointTemplate(this.#point, this.#offersByType, this.#destination);
   }
 
-  #clickEditHendler = (evt) => {
+  #clickEditHandler = (evt) => {
     evt.preventDefault();
-    this.#hendleEditClick();
+    this.#handleEditClick();
   };
 
-  #clickFavoriteHendler = (evt) => {
+  #clickFavoriteHandler = (evt) => {
     evt.preventDefault();
-    this.#hendleFavoriteClick();
+    this.#handleFavoriteClick();
   };
 }
