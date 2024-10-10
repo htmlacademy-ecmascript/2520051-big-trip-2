@@ -97,21 +97,18 @@ export default class TripTablePresenter {
       this.#points = this.#getPoints();
       remove(this.#filterComponent);
       this.#filterComponent = null;
-      if(!this.#points.length && this.#currentFilter === Filter.PAST){
+      if(this.#currentFilter === Filter.PAST && !this.#points.length){
         this.#emptyStatus = DataStatus.PAST_EMPTY;
       }
-      if(!this.#points.length && this.#currentFilter === Filter.PRESENT){
+      if(this.#currentFilter === Filter.PRESENT && !this.#points.length){
         this.#emptyStatus = DataStatus.FUTURE_EMPTY;
-
       }
-
-      if(!this.#points.length && this.#currentFilter === Filter.FUTURE){
+      if(this.#currentFilter === Filter.FUTURE && !this.#points.length){
         this.#emptyStatus = DataStatus.FUTURE_EMPTY;
       }
       if (this.#emptyStatus !== null){
         this.#renderEmpty(this.#emptyStatus);
       } else {
-
         this.#newPointButton.element.disabled = false;
         if(this.#infoPresenter === null){
           this.#infoPresenter = new InfoPresenter(this.#pointsModel, this.#destinationModel, this.#offersModel);
