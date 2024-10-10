@@ -73,4 +73,4 @@ const Mode = {
   ADDING: 'ADDING'
 };
 
-export { AUTHORIZATION, END_POINT, Url, Method, RenderPosition, DateFormat, DataStatus, Filter, SortType, UserAction, UpdateType, Mode }
+export { AUTHORIZATION, END_POINT, Url, Method, RenderPosition, DateFormat, DataStatus, Filter, SortType, UserAction, UpdateType, Mode };
