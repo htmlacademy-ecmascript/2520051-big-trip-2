@@ -115,22 +115,25 @@ export default class PointPresenter {
     }
   }
 
-  setAborting() {
-    const resetFormState = () => {
-      this.#editComponent.updateElement({
-        isDisabled: false,
-        isSaving: false,
-        isDeleting: false,
-      });
-    };
-
-    this.#editComponent.shake(resetFormState);
+  setAborting(isForm = true) {
+    if(isForm){
+      const resetFormState = () => {
+        this.#editComponent.updateElement({
+          isDisabled: false,
+          isSaving: false,
+          isDeleting: false,
+        });
+      };
+      this.#editComponent.shake(resetFormState);
+    } else {
+      this.#pointComponent.shake();
+    }
   }
 
   #handleFormSubmit = (point) => {
     this.#handleDataChange(
       this.#action,
-      UpdateType.MINOR,
+      this.#mode === Mode.ADDING ? UpdateType.MAJOR : UpdateType.MINOR,
       {...point},
     );
   };
@@ -154,7 +157,7 @@ export default class PointPresenter {
 
   #handleFavoriteClick = () => {
     this.#handleDataChange(
-      this.#action,
+      UserAction.WITHOUT_FORM,
       UpdateType.MINOR,
       {...this.#point, isFavorite: !this.#point.isFavorite}
     );

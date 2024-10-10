@@ -4,8 +4,7 @@ import dayjs from 'dayjs';
 
 
 export default class PointsModel extends Observable {
-  #points;
-  #dataFilter = null;
+  #points = [];
   #pointsApiService = null;
 
   constructor(pointsApiService) {
@@ -13,22 +12,17 @@ export default class PointsModel extends Observable {
     this.#pointsApiService = pointsApiService;
   }
 
-  get dataFilter() {
-    return this.#dataFilter;
-  }
-
-  set dataFilter(filter) {
-    this.#dataFilter = filter;
-  }
-
-  get points() {
-    switch (this.#dataFilter){
+  getPoints(dataFilter = Filter.DEFAULT) {
+    if(this.#points === null) {
+      return null;
+    }
+    switch (dataFilter){
       case Filter.FUTURE:
-        return this.#points.filter((point) => dayjs().isBefore(point.dateFrom, 'day'));
+        return this.#points.filter((point) => dayjs().isBefore(point.dateFrom));
       case Filter.PRESENT:
-        return this.#points.filter((point) => dayjs().isSame(point.dateFrom, 'day'));
+        return this.#points.filter((point) => dayjs().isAfter(point.dateFrom)).filter((point) => dayjs().isBefore(point.dateTo));
       case Filter.PAST:
-        return this.#points.filter((point) => dayjs().isAfter(point.dateFrom, 'day'));
+        return this.#points.filter((point) => dayjs().isAfter(point.dateTo));
       default:
         return this.#points;
     }
@@ -40,7 +34,7 @@ export default class PointsModel extends Observable {
       const points = await this.#pointsApiService.points;
       this.#points = points.map(this.#adaptToClient);
     } catch(err) {
-      this.#points = [];
+      this.#points = null;
     }
     this._notify(UpdateType.INIT);
   }
