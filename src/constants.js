@@ -24,6 +24,7 @@ export const RenderPosition = {
 export const DateFormat = {
   DATE_TIME: 'YYYY-MM-DDTHH:mm',
   HUMAN: 'MMM D',
+  HUMAN_: 'D MMM',
   TIME: 'HH:mm',
   DATE_DB: 'YYYY-MM-DD',
   BRITAIN: 'DD/MM/YY HH:mm',
@@ -35,7 +36,7 @@ export const DataStatus = {
   FUTURE_EMPTY: 'There are no future events now',
   PRESENT_EMPTY: 'There are no present events now',
   PAST_EMPTY: 'There are no past events now',
-  ERROR: 'Data loading error',
+  ERROR: 'Failed to load latest route information',
   LOADING: 'Loading...'
 };
 
@@ -54,9 +55,10 @@ export const SortType = {
 };
 
 export const UserAction = {
-  UPDATE_TASK: 'UPDATE_TASK',
-  ADD_TASK: 'ADD_TASK',
-  DELETE_TASK: 'DELETE_TASK',
+  UPDATE_POINT: 'UPDATE_POINT',
+  WITHOUT_FORM: 'WITHOUT_FORM',
+  ADD_POINT: 'ADD_POINT',
+  DELETE_POINT: 'DELETE_POINT',
 };
 
 export const UpdateType = {

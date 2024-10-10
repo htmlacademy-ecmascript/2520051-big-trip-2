@@ -5,9 +5,9 @@ import dayjs from 'dayjs';
 
 function createTripInfoDates (dateFrom, dateTo) {
   if(dayjs(dateFrom).isSame(dateTo, 'month')){
-    return (`${getDatetimeFormat(dateFrom, DateFormat.HUMAN)}&nbsp;—&nbsp;${getDatetimeFormat(dateTo, DateFormat.DAY)}`);
+    return (`${getDatetimeFormat(dateFrom, DateFormat.DAY)}&nbsp;—&nbsp;${getDatetimeFormat(dateTo, DateFormat.HUMAN_)}`);
   }
-  return (`${getDatetimeFormat(dateFrom, DateFormat.HUMAN)}&nbsp;—&nbsp;${getDatetimeFormat(dateTo, DateFormat.HUMAN)}`);
+  return (`${getDatetimeFormat(dateFrom, DateFormat.HUMAN_)}&nbsp;—&nbsp;${getDatetimeFormat(dateTo, DateFormat.HUMAN_)}`);
 }
 
 function createInfoTemplate(totalPrice, dateFrom, dateTo, route) {

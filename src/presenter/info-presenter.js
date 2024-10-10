@@ -18,20 +18,23 @@ export default class InfoPresenter {
 
   init(headerElement) {
     let total = 0;
-    this.#sortPoints = [...this.#pointsModel.points].sort((a, b) => sortByDay(a, b));
-    this.#sortPoints.forEach((point) => {
-      total += point.basePrice;
-      const offerList = this.#offersModel.getOffersByType(point.type).offers;
-      point.offers.forEach((pointOffer) =>
-        total += offerList.find((offer) => offer.id === pointOffer).price
-      );
-    });
-    const dateFrom = this.#sortPoints[0].dateFrom;
-    const dateTo = this.#sortPoints.at(-1).dateTo;
+    this.#sortPoints = [...this.#pointsModel.getPoints()].sort((a, b) => sortByDay(a, b));
 
-    const route = this.#getRout();
-    this.#infoComponent = new InfoView(total, route, dateFrom, dateTo);
-    render(this.#infoComponent, headerElement, RenderPosition.AFTERBEGIN);
+    if (this.#sortPoints !== null && this.#sortPoints.length > 0){
+      this.#sortPoints.forEach((point) => {
+        total += point.basePrice;
+        const offerList = this.#offersModel.getOffersByType(point.type).offers;
+        for(let i = 0; i < point.offers.lenght; i++){
+          total += offerList.find((offer) => offer.id === point.offers[i]).price;
+        }
+      });
+      const dateFrom = this.#sortPoints[0].dateFrom;
+      const dateTo = this.#sortPoints.at(-1).dateTo;
+
+      const route = this.#getRout();
+      this.#infoComponent = new InfoView(total, route, dateFrom, dateTo);
+      render(this.#infoComponent, headerElement, RenderPosition.AFTERBEGIN);
+    }
   }
 
   removeView() {

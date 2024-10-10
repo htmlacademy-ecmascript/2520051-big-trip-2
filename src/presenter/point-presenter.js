@@ -27,7 +27,7 @@ export default class PointPresenter {
     this.#tableElement = tableElement;
     this.#destinations = this.#destinationModel.destinations;
     this.#mode = mode;
-    this.#action = mode === Mode.ADDING ? UserAction.ADD_TASK : UserAction.UPDATE_TASK;
+    this.#action = mode === Mode.ADDING ? UserAction.ADD_POINT : UserAction.UPDATE_POINT;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
 
@@ -42,7 +42,7 @@ export default class PointPresenter {
     const prevPointComponent = this.#pointComponent;
     const prevEditComponent = this.#editComponent;
 
-    if(this.#mode !== 'ADDING'){
+    if(this.#mode !== Mode.ADDING){
       this.#pointComponent = new PointView(
         this.#point,
         offersAll,
@@ -115,33 +115,27 @@ export default class PointPresenter {
     }
   }
 
-  setAborting() {
-    // if (this.#mode === Mode.DEFAULT) {
-    //   this.#pointComponent.shake();
-    //   return;
-    // }
-
-    const resetFormState = () => {
-      this.#editComponent.updateElement({
-        isDisabled: false,
-        isSaving: false,
-        isDeleting: false,
-      });
-    };
-
-    this.#editComponent.shake(resetFormState);
+  setAborting(isForm = true) {
+    if(isForm){
+      const resetFormState = () => {
+        this.#editComponent.updateElement({
+          isDisabled: false,
+          isSaving: false,
+          isDeleting: false,
+        });
+      };
+      this.#editComponent.shake(resetFormState);
+    } else {
+      this.#pointComponent.shake();
+    }
   }
 
   #handleFormSubmit = (point) => {
     this.#handleDataChange(
       this.#action,
-      UpdateType.MINOR,
+      this.#mode === Mode.ADDING ? UpdateType.MAJOR : UpdateType.MINOR,
       {...point},
     );
-    // if(this.#mode !== Mode.ADDING){
-
-    //   this.#replaceEditToPoint();
-    // }
   };
 
   #handleDeleteClick = (point) => {
@@ -150,7 +144,7 @@ export default class PointPresenter {
       return;
     }
     this.#handleDataChange(
-      UserAction.DELETE_TASK,
+      UserAction.DELETE_POINT,
       UpdateType.MINOR,
       point,
     );
@@ -163,7 +157,7 @@ export default class PointPresenter {
 
   #handleFavoriteClick = () => {
     this.#handleDataChange(
-      this.#action,
+      UserAction.WITHOUT_FORM,
       UpdateType.MINOR,
       {...this.#point, isFavorite: !this.#point.isFavorite}
     );

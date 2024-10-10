@@ -2,26 +2,22 @@ import {render, remove} from '../framework/render.js';
 import dayjs from 'dayjs';
 
 import TripTableView from '../view/trip-table-view.js';
-import { DataStatus } from '../constants.js';
+import { DataStatus, RenderPosition, SortType, UpdateType, UserAction, Filter, Mode } from '../constants.js';
 
 import SortMenuView from '../view/sorting-view.js';
 import FilterFormView from '../view/filters-view.js';
 import EmptyTableView from '../view/empty-table-view.js';
 import LoadingView from '../view/loading-view.js';
 
-import { RenderPosition } from '../constants.js';
-
 import InfoPresenter from './info-presenter.js';
 import PointPresenter from './point-presenter.js';
 import { sortByTime, sortByDay } from '../utils.js';
-
-import { SortType, UpdateType, UserAction, Filter, Mode } from '../constants.js';
 
 import NewPointButtonView from '../view/new-point-button-view.js';
 
 
 export default class TripTablePresenter {
-  #tableComponent = new TripTableView();
+  #tableComponent = null;
   #boardContainer = null;
   #headerElement = null;
   #infoPresenter = null;
@@ -38,6 +34,7 @@ export default class TripTablePresenter {
   #filterComponent = null;
   #noPointsComponent = null;
   #sortComponent = null;
+  #emptyStatus = null;
   #loadingComponent = new LoadingView();
   #newPointButton = null;
 
@@ -66,16 +63,22 @@ export default class TripTablePresenter {
   }
 
   #getPoints() {
-
-    this.#pointsModel.dataFilter = this.#currentFilter;
-
+    this.#points = this.#pointsModel.getPoints();
+    if (this.#points === null) {
+      this.#emptyStatus = DataStatus.ERROR;
+      return null;
+    }
+    if (!this.#points.length) {
+      this.#emptyStatus = DataStatus.EMPTY;
+      return 0;
+    }
     switch (this.#currentSortType) {
       case SortType.TIME:
-        return this.#sortByTime();
+        return [...this.#pointsModel.getPoints(this.#currentFilter)].sort((a, b) => sortByTime(a, b));
       case SortType.PRICE:
-        return this.#sortByPrice();
+        return [...this.#pointsModel.getPoints(this.#currentFilter)].sort((a, b) => b.basePrice - a.basePrice);
       default:
-        return this.#sortByDay();
+        return [...this.#pointsModel.getPoints(this.#currentFilter)].sort((a, b) => sortByDay(a, b));
     }
   }
 
@@ -83,46 +86,69 @@ export default class TripTablePresenter {
     this.#boardContainer = document.querySelector('.trip-events');
     this.#headerElement = document.querySelector('.trip-main');
     const filterControlElement = this.#headerElement.querySelector('.trip-controls__filters');
-    if(this.#filterComponent !== null) {
-      remove(this.#filterComponent);
-    }
+    this.#emptyStatus = null;
+
     if(this.#newPointButton === null){
       this.#renderNewPointButton();
     }
     if (this.#isLoading) {
       this.#renderLoading();
     } else {
-
       this.#points = this.#getPoints();
+      remove(this.#filterComponent);
+      this.#filterComponent = null;
+      if(!this.#points.length && this.#currentFilter === Filter.PAST){
+        this.#emptyStatus = DataStatus.PAST_EMPTY;
+      }
+      if(!this.#points.length && this.#currentFilter === Filter.PRESENT){
+        this.#emptyStatus = DataStatus.FUTURE_EMPTY;
 
-      this.#filterMap.everything = true;
-      this.#filterMap.present = this.#points.some((point) => dayjs().isAfter(point.dateFrom) && dayjs().isBefore(point.dateTo));
-      this.#filterMap.past = this.#points.some((point) => dayjs().isAfter(point.dateTo));
-      this.#filterMap.future = this.#points.some((point) => dayjs().isBefore(point.dateFrom));
-
-      this.#renderEmpty();
-      if(this.#noPointsComponent === null){
-        this.#renderList();
       }
 
-    }
-    this.#filterComponent = new FilterFormView(this.#currentFilter, this.#handleFilterChange, this.#filterMap);
-    render(this.#filterComponent, filterControlElement);
+      if(!this.#points.length && this.#currentFilter === Filter.FUTURE){
+        this.#emptyStatus = DataStatus.FUTURE_EMPTY;
+      }
+      if (this.#emptyStatus !== null){
+        this.#renderEmpty(this.#emptyStatus);
+      } else {
 
+        this.#newPointButton.element.disabled = false;
+        if(this.#infoPresenter === null){
+          this.#infoPresenter = new InfoPresenter(this.#pointsModel, this.#destinationModel, this.#offersModel);
+          this.#infoPresenter.init(this.#headerElement);
+        }
+        this.#getFilterMap();
+        this.#renderList();
+      }
+    }
+    if (this.#filterComponent === null) {
+      this.#filterComponent = new FilterFormView(this.#currentFilter, this.#handleFilterChange, this.#filterMap);
+      render(this.#filterComponent, filterControlElement);
+    }
   }
 
-  #clearBoard(resetSortType = false) {
+  #getFilterMap() {
+    const points = this.#pointsModel.getPoints();
+    this.#filterMap.everything = true;
+    this.#filterMap.present = points.some((point) => dayjs().isAfter(point.dateFrom) && dayjs().isBefore(point.dateTo));
+    this.#filterMap.past = points.some((point) => dayjs().isAfter(point.dateTo));
+    this.#filterMap.future = points.some((point) => dayjs().isBefore(point.dateFrom));
+  }
+
+  #clearBoard(resetSortType = false, resetInfo = true) {
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
     this.#removeNewForm();
     remove(this.#noPointsComponent);
     remove(this.#loadingComponent);
-    if(this.#infoPresenter !== null) {
+    if(resetInfo && this.#infoPresenter !== null) {
       this.#infoPresenter.removeView();
       this.#infoPresenter = null;
     }
     if (resetSortType) {
       this.#currentSortType = SortType.DEFAULT;
+      remove(this.#sortComponent);
+      this.#sortComponent = null;
     }
 
   }
@@ -132,19 +158,23 @@ export default class TripTablePresenter {
       this.#sortComponent = new SortMenuView(this.#currentSortType, this.#handleSortTypeChange);
       this.#renderSorting();
     }
-    if(this.#infoPresenter === null){
-      this.#infoPresenter = new InfoPresenter(this.#pointsModel, this.#destinationModel, this.#offersModel);
-      this.#infoPresenter.init(this.#headerElement);
-    }
     this.#renderPoints(this.#points);
   }
 
   #renderEmpty() {
-    this.#noPointsComponent = null;
-    if (this.#points === undefined) {
+    if(this.#emptyStatus === DataStatus.ERROR) {
+      this.#newPointButton.element.disabled = true;
       this.#noPointsComponent = new EmptyTableView(DataStatus.ERROR);
-    } else if (!this.#points.length) {
+    } else if (this.#emptyStatus === DataStatus.EMPTY) {
+      this.#newPointButton.element.disabled = false;
+      this.#filterMap.everything = true;
       this.#noPointsComponent = new EmptyTableView(DataStatus.EMPTY);
+    } else if (this.#emptyStatus !== null) {
+      this.#noPointsComponent = new EmptyTableView(this.#emptyStatus);
+      if(this.#infoPresenter === null){
+        this.#infoPresenter = new InfoPresenter(this.#pointsModel, this.#destinationModel, this.#offersModel);
+        this.#infoPresenter.init(this.#headerElement);
+      }
     }
     if(this.#noPointsComponent !== null) {
       remove(this.#sortComponent);
@@ -158,6 +188,9 @@ export default class TripTablePresenter {
   }
 
   #renderPoints (points) {
+    if (this.#tableComponent === null){
+      this.#tableComponent = new TripTableView();
+    }
     render(this.#tableComponent, this.#boardContainer);
     points.forEach((point) => {
       this.#renderPoint(
@@ -180,7 +213,7 @@ export default class TripTablePresenter {
 
 
   #renderLoading() {
-
+    this.#newPointButton.element.disabled = true;
     this.#loadingComponent = new EmptyTableView(DataStatus.LOADING);
     render (this.#loadingComponent, this.#boardContainer);
 
@@ -199,14 +232,20 @@ export default class TripTablePresenter {
     if (this.#currentFilter === filter) {
       return;
     }
-
     this.#currentFilter = filter;
-    this.#clearBoard();
+    this.#clearBoard(true, true);
     this.#renderBoard();
-
   };
 
   #handleNewPointButtonClick = () => {
+    this.#currentFilter = Filter.DEFAULT;
+    this.#clearBoard(true, true);
+    this.#renderBoard();
+    if (this.#tableComponent === null) {
+      remove(this.#noPointsComponent);
+      this.#tableComponent = new TripTableView();
+      render(this.#tableComponent, this.#boardContainer);
+    }
     this.#newPointPresenter = new PointPresenter(
       this.#offersModel,
       this.#destinationModel,
@@ -230,14 +269,7 @@ export default class TripTablePresenter {
 
   };
 
-  #sortByPrice = () => [...this.#pointsModel.points].sort((a, b) => b.basePrice - a.basePrice);
-
-  #sortByTime = () => [...this.#pointsModel.points].sort((a, b) => sortByTime(a, b));
-
-  #sortByDay = () => [...this.#pointsModel.points].sort((a, b) => sortByDay(a, b));
-
   #removeNewForm = () => {
-
     if(this.#newPointPresenter === null){
       return;
     }
@@ -258,14 +290,14 @@ export default class TripTablePresenter {
     }
 
     this.#currentSortType = sortType;
-    this.#clearBoard();
+    this.#clearBoard(false, false);
     this.#points = this.#getPoints();
     this.#renderList();
   };
 
   #handleViewAction = async (actionType, updateType, update) => {
     switch (actionType) {
-      case UserAction.UPDATE_TASK:
+      case UserAction.UPDATE_POINT:
         this.#pointPresenters.get(update.id).setSaving();
         try {
           await this.#pointsModel.updatePoint(updateType, update);
@@ -273,7 +305,15 @@ export default class TripTablePresenter {
           this.#pointPresenters.get(update.id).setAborting();
         }
         break;
-      case UserAction.ADD_TASK:
+      case UserAction.WITHOUT_FORM:
+        this.#pointPresenters.get(update.id).setSaving();
+        try {
+          await this.#pointsModel.updatePoint(updateType, update);
+        } catch(err) {
+          this.#pointPresenters.get(update.id).setAborting(false);
+        }
+        break;
+      case UserAction.ADD_POINT:
         this.#newPointPresenter.setSaving();
         try {
           await this.#pointsModel.addPoint(updateType, update);
@@ -281,7 +321,7 @@ export default class TripTablePresenter {
           this.#newPointPresenter.setAborting();
         }
         break;
-      case UserAction.DELETE_TASK:
+      case UserAction.DELETE_POINT:
         this.#pointPresenters.get(update.id).setDeleting();
         try {
           await this.#pointsModel.deletePoint(updateType, update);
@@ -299,11 +339,11 @@ export default class TripTablePresenter {
         this.#pointPresenters.get(data.id).init(data);
         break;
       case UpdateType.MINOR:
-        this.#clearBoard();
+        this.#clearBoard(false, true);
         this.#renderBoard();
         break;
       case UpdateType.MAJOR:
-        this.#clearBoard(true);
+        this.#clearBoard(true, true);
         this.#renderBoard();
         break;
       case UpdateType.INIT:

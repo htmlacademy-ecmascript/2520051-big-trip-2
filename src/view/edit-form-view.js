@@ -77,18 +77,30 @@ const createPhotoContainer = (photos) => {
                     </div>`;
 };
 
-const createDestinationSection = (destination) =>
-  `<section class="event__section  event__section--destination">
+const createDestinationSection = (destination) => {
+  if (!destination.description) {
+    return '';
+  }
+  return `<section class="event__section  event__section--destination">
   <h3 class="event__section-title  event__section-title--destination">Destination</h3>
   <p class="event__destination-description">${destination.description}</p>
   ${createPhotoContainer(destination.pictures)}
 </section>`;
+};
 
+const createTextDeletingButton = (point) => {
+  if (!point.id) {
+    return 'Cancel';
+  }
+  if (point.isDeleting) {
+    return 'Deleting...';
+  }
+  return 'Delete';
+};
 
 const createEditFormTemplate = (point, types, destination, destinations, offersByType) => {
   const isDisabled = point.isDisabled ? point.isDisabled : '';
   const isSaving = point.isSaving ? point.isSaving : '';
-  const isDeleting = point.isDeleting ? point.isDeleting : '';
 
   return `<li class="trip-events__item">
     <form class="event event--edit ${point.id ? '' : 'event--edit-new'}" action="#" method="post">
@@ -136,7 +148,7 @@ ${createDestinationField(destinations)}
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit"  ${isDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
-        <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${point.id ? (isDeleting ? 'Deleting...' : 'Delete') : 'Cancel'}</button>
+        <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${createTextDeletingButton(point)}</button>
           ${ point.id ?
     `<button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
@@ -146,7 +158,7 @@ ${createDestinationField(destinations)}
       <section class="event__details">
         ${createOffersSection(point.offers, offersByType)}
 
-        ${destination ? (destination.description ? createDestinationSection(destination) : '') : ''}
+        ${destination ? createDestinationSection(destination) : ''}
       </section>
     </form>
   </li>
@@ -158,7 +170,7 @@ export default class EditFormView extends AbstractStatefulView {
   #offersModel = null;
   #offersByType = null;
   #destinations = null;
-  #hendleDemoClick;
+  #handleDemoClick;
   #handleFormSubmit;
   #types;
   #prevDestination = null;
@@ -172,7 +184,7 @@ export default class EditFormView extends AbstractStatefulView {
     this.#point = point;
     this.#offersModel = offersModel;
     this.#destinations = destinations;
-    this.#hendleDemoClick = onDemoClick;
+    this.#handleDemoClick = onDemoClick;
     this.#types = this.#offersModel.types;
     this.#handleFormSubmit = onFormSubmit;
 
@@ -198,7 +210,7 @@ export default class EditFormView extends AbstractStatefulView {
     const rollupElement = this.element.querySelector('.event__rollup-btn');
     if(rollupElement) {
       this.element.querySelector('.event__rollup-btn')
-        .addEventListener('click', this.#clickDemoHendler);
+        .addEventListener('click', this.#clickDemoHandler);
     }
 
 
@@ -242,8 +254,8 @@ export default class EditFormView extends AbstractStatefulView {
     this.#setDatePicker();
   };
 
-  #clickDemoHendler = () => {
-    this.#hendleDemoClick();
+  #clickDemoHandler = () => {
+    this.#handleDemoClick();
   };
 
   #formSubmitHandler = (evt) => {
@@ -255,7 +267,10 @@ export default class EditFormView extends AbstractStatefulView {
     if (evt.target.tagName !== 'INPUT') {
       return;
     }
-    this.updateElement({...this._state, type: evt.target.value, offers: []}); // добавить проверку, изменился ли тип
+    if(this._state.type === evt.target.value) {
+      return;
+    }
+    this.updateElement({...this._state, type: evt.target.value, offers: []});
   };
 
   #destinationChangeHandler = (evt) => {
