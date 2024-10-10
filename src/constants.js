@@ -1,27 +1,27 @@
-export const AUTHORIZATION = 'Basic if85f74ls8';
-export const END_POINT = 'https://23.objects.htmlacademy.pro/big-trip';
+const AUTHORIZATION = 'Basic if85f74ls8';
+const END_POINT = 'https://23.objects.htmlacademy.pro/big-trip';
 
-export const Url = {
+const Url = {
   POINTS: 'points',
   DESTINATIONS: 'destinations',
   OFFERS: 'offers'
 };
 
-export const Method = {
+const Method = {
   GET: 'GET',
   PUT: 'PUT',
   POST: 'POST',
   DELETE: 'DELETE'
 };
 
-export const RenderPosition = {
+const RenderPosition = {
   BEFOREBEGIN: 'beforebegin',
   AFTERBEGIN: 'afterbegin',
   BEFOREEND: 'beforeend',
   AFTEREND: 'afterend',
 };
 
-export const DateFormat = {
+const DateFormat = {
   DATE_TIME: 'YYYY-MM-DDTHH:mm',
   HUMAN: 'MMM D',
   HUMAN_: 'D MMM',
@@ -31,7 +31,7 @@ export const DateFormat = {
   DAY: 'D'
 };
 
-export const DataStatus = {
+const DataStatus = {
   EMPTY: 'Click New Event to create your first point',
   FUTURE_EMPTY: 'There are no future events now',
   PRESENT_EMPTY: 'There are no present events now',
@@ -40,36 +40,37 @@ export const DataStatus = {
   LOADING: 'Loading...'
 };
 
-export const Filter = {
+const Filter = {
   DEFAULT: 'everything',
   FUTURE: 'future',
   PRESENT: 'present',
   PAST: 'past'
 };
 
-
-export const SortType = {
+const SortType = {
   DEFAULT: 'day',
   TIME: 'time',
   PRICE: 'price',
 };
 
-export const UserAction = {
+const UserAction = {
   UPDATE_POINT: 'UPDATE_POINT',
   WITHOUT_FORM: 'WITHOUT_FORM',
   ADD_POINT: 'ADD_POINT',
   DELETE_POINT: 'DELETE_POINT',
 };
 
-export const UpdateType = {
+const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
   INIT: 'INIT',
 };
 
-export const Mode = {
+const Mode = {
   DEFAULT: 'DEFAULT',
   EDITING: 'EDITING',
   ADDING: 'ADDING'
 };
+
+export { AUTHORIZATION, END_POINT, Url, Method, RenderPosition, DateFormat, DataStatus, Filter, SortType, UserAction, UpdateType, Mode }
