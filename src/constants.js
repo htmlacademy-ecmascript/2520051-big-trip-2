@@ -55,10 +55,10 @@ export const SortType = {
 };
 
 export const UserAction = {
-  UPDATE_TASK: 'UPDATE_TASK',
+  UPDATE_POINT: 'UPDATE_POINT',
   WITHOUT_FORM: 'WITHOUT_FORM',
-  ADD_TASK: 'ADD_TASK',
-  DELETE_TASK: 'DELETE_TASK',
+  ADD_POINT: 'ADD_POINT',
+  DELETE_POINT: 'DELETE_POINT',
 };
 
 export const UpdateType = {

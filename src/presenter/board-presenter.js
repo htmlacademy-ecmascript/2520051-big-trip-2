@@ -297,7 +297,7 @@ export default class TripTablePresenter {
 
   #handleViewAction = async (actionType, updateType, update) => {
     switch (actionType) {
-      case UserAction.UPDATE_TASK:
+      case UserAction.UPDATE_POINT:
         this.#pointPresenters.get(update.id).setSaving();
         try {
           await this.#pointsModel.updatePoint(updateType, update);
@@ -313,7 +313,7 @@ export default class TripTablePresenter {
           this.#pointPresenters.get(update.id).setAborting(false);
         }
         break;
-      case UserAction.ADD_TASK:
+      case UserAction.ADD_POINT:
         this.#newPointPresenter.setSaving();
         try {
           await this.#pointsModel.addPoint(updateType, update);
@@ -321,7 +321,7 @@ export default class TripTablePresenter {
           this.#newPointPresenter.setAborting();
         }
         break;
-      case UserAction.DELETE_TASK:
+      case UserAction.DELETE_POINT:
         this.#pointPresenters.get(update.id).setDeleting();
         try {
           await this.#pointsModel.deletePoint(updateType, update);

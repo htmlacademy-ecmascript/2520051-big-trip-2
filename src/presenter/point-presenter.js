@@ -27,7 +27,7 @@ export default class PointPresenter {
     this.#tableElement = tableElement;
     this.#destinations = this.#destinationModel.destinations;
     this.#mode = mode;
-    this.#action = mode === Mode.ADDING ? UserAction.ADD_TASK : UserAction.UPDATE_TASK;
+    this.#action = mode === Mode.ADDING ? UserAction.ADD_POINT : UserAction.UPDATE_POINT;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
 
@@ -144,7 +144,7 @@ export default class PointPresenter {
       return;
     }
     this.#handleDataChange(
-      UserAction.DELETE_TASK,
+      UserAction.DELETE_POINT,
       UpdateType.MINOR,
       point,
     );
