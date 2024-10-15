@@ -27,7 +27,7 @@ ${createFilterItems(currentFilter, filterMap)}
   );
 }
 
-export default class FilterFormView extends AbstractView {
+export default class FiltersView extends AbstractView {
   #currentFilter;
   #handleFilterChange;
   #filterMap;

@@ -1,5 +1,5 @@
 import {remove, render} from '../framework/render.js';
-import InfoView from '../view/trip-info-view.js';
+import TripInfoView from '../view/trip-info-view.js';
 import { RenderPosition } from '../constants.js';
 import { sortByDay } from '../utils.js';
 
@@ -32,7 +32,7 @@ export default class InfoPresenter {
       const dateTo = this.#sortPoints.at(-1).dateTo;
 
       const route = this.#getRout();
-      this.#infoComponent = new InfoView(total, route, dateFrom, dateTo);
+      this.#infoComponent = new TripInfoView(total, route, dateFrom, dateTo);
       render(this.#infoComponent, headerElement, RenderPosition.AFTERBEGIN);
     }
   }
