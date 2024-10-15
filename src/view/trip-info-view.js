@@ -27,7 +27,7 @@ function createInfoTemplate(totalPrice, dateFrom, dateTo, route) {
   );
 }
 
-export default class InfoView extends AbstractView {
+export default class TripInfoView extends AbstractView {
   #totalPrice;
   #dateFrom;
   #dateTo;

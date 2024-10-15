@@ -58,7 +58,7 @@ ${createOfferItem(point.offers, offersByType)}
   );
 };
 
-export default class PointView extends AbstractView {
+export default class TripPointView extends AbstractView {
   #point = null;
   #offers = null;
   #destination = null;

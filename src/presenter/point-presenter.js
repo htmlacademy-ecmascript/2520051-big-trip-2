@@ -1,6 +1,6 @@
 import {render, replace, remove} from '../framework/render.js';
 
-import PointView from '../view/trip-point-view.js';
+import TripPointView from '../view/trip-point-view.js';
 import EditFormView from '../view/edit-form-view.js';
 import {UserAction, UpdateType, RenderPosition, Mode} from '../constants.js';
 
@@ -43,7 +43,7 @@ export default class PointPresenter {
     const prevEditComponent = this.#editComponent;
 
     if(this.#mode !== Mode.ADDING){
-      this.#pointComponent = new PointView(
+      this.#pointComponent = new TripPointView(
         this.#point,
         offersAll,
         destination,

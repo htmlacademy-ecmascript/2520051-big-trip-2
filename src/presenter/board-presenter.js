@@ -4,8 +4,8 @@ import dayjs from 'dayjs';
 import TripTableView from '../view/trip-table-view.js';
 import { DataStatus, RenderPosition, SortType, UpdateType, UserAction, Filter, Mode } from '../constants.js';
 
-import SortMenuView from '../view/sorting-view.js';
-import FilterFormView from '../view/filters-view.js';
+import SortingView from '../view/sorting-view.js';
+import FiltersView from '../view/filters-view.js';
 import EmptyTableView from '../view/empty-table-view.js';
 import LoadingView from '../view/loading-view.js';
 
@@ -38,7 +38,7 @@ export default class TripTablePresenter {
   #loadingComponent = new LoadingView();
   #newPointButton = null;
 
-  #isLoading = 3;
+  #isLoading;
   #filterMap = {
     everything: false,
     future: false,
@@ -50,6 +50,7 @@ export default class TripTablePresenter {
     this.#offersModel = models.offers;
     this.#destinationModel = models.destination;
     this.#pointsModel = models.points;
+    this.#isLoading = Object.keys(models).length;
     this.#destinationModel.addObserver(this.#handleModelEvent);
     this.#offersModel.addObserver(this.#handleModelEvent);
     this.#pointsModel.addObserver(this.#handleModelEvent);
@@ -119,7 +120,7 @@ export default class TripTablePresenter {
       }
     }
     if (this.#filterComponent === null) {
-      this.#filterComponent = new FilterFormView(this.#currentFilter, this.#handleFilterChange, this.#filterMap);
+      this.#filterComponent = new FiltersView(this.#currentFilter, this.#handleFilterChange, this.#filterMap);
       render(this.#filterComponent, filterControlElement);
     }
   }
@@ -152,7 +153,7 @@ export default class TripTablePresenter {
 
   #renderList() {
     if(this.#sortComponent === null){
-      this.#sortComponent = new SortMenuView(this.#currentSortType, this.#handleSortTypeChange);
+      this.#sortComponent = new SortingView(this.#currentSortType, this.#handleSortTypeChange);
       this.#renderSorting();
     }
     this.#renderPoints(this.#points);

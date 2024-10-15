@@ -52,7 +52,7 @@ ${createSortItems(sortType)}
   );
 }
 
-export default class SortMenuView extends AbstractView {
+export default class SortingView extends AbstractView {
 
   #currentSortType = null;
   #handleSortTypeChange = null;
