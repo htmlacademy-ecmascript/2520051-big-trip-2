@@ -15,6 +15,7 @@ import { sortByTime, sortByDay } from '../utils.js';
 
 import NewPointButtonView from '../view/new-point-button-view.js';
 
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 
 export default class TripTablePresenter {
   #tableComponent = null;
