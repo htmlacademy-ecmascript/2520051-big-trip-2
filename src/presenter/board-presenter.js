@@ -294,14 +294,17 @@ export default class TripTablePresenter {
   };
 
   #handleViewAction = async (actionType, updateType, update) => {
+    const blockInterface = new UiBlocker(0, 100);
     switch (actionType) {
       case UserAction.UPDATE_POINT:
         this.#pointPresenters.get(update.id).setSaving();
+        blockInterface.block();
         try {
           await this.#pointsModel.updatePoint(updateType, update);
         } catch(err) {
           this.#pointPresenters.get(update.id).setAborting();
         }
+        blockInterface.unblock();
         break;
       case UserAction.WITHOUT_FORM:
         this.#pointPresenters.get(update.id).setSaving();
@@ -313,19 +316,23 @@ export default class TripTablePresenter {
         break;
       case UserAction.ADD_POINT:
         this.#newPointPresenter.setSaving();
+        blockInterface.block();
         try {
           await this.#pointsModel.addPoint(updateType, update);
         } catch(err) {
           this.#newPointPresenter.setAborting();
         }
+        blockInterface.unblock();
         break;
       case UserAction.DELETE_POINT:
         this.#pointPresenters.get(update.id).setDeleting();
+        blockInterface.block();
         try {
           await this.#pointsModel.deletePoint(updateType, update);
         } catch(err) {
           this.#pointPresenters.get(update.id).setAborting();
         }
+        blockInterface.unblock();
         break;
     }
 
